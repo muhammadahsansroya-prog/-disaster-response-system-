@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Help Request - Disaster Response</title>
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 40px auto; padding: 20px; }
+        input, select, button { width: 100%; padding: 10px; margin: 8px 0; font-size: 16px; }
+        button { background: #d32f2f; color: white; border: none; cursor: pointer; }
+        #status { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Emergency Help Request</h2>
+    <p id="status">Detecting your location...</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label>Location (auto-detected):</label>
+        <input type="text" name="location" id="location" placeholder="Detecting..." required>
+
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+
+        <label>What do you need?</label>
+        <select name="need_type" required>
+            <option value="food">Food</option>
+            <option value="medical">Medical Help</option>
+            <option value="rescue_boat">Rescue Boat</option>
+            <option value="shelter">Shelter</option>
+        </select>
+
+        <label>Urgency:</label>
+        <select name="urgency" required>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+        </select>
+
+        <button type="submit">Submit Request</button>
+    </form>
+
+    <script>
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById("latitude").value = position.coords.latitude;
+                document.getElementById("longitude").value = position.coords.longitude;
+                document.getElementById("location").value =
+                    position.coords.latitude.toFixed(4) + ", " + position.coords.longitude.toFixed(4);
+                document.getElementById("status").innerText = "Location detected successfully.";
+            }, function(error) {
+                document.getElementById("status").innerText = "Location access denied. Please type manually.";
+            });
+        } else {
+            document.getElementById("status").innerText = "Geolocation not supported. Please type manually.";
+        }
+    </script>
+</body>
+</html>
