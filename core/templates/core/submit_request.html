@@ -1,59 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Help Request - Disaster Response</title>
-    <style>
-        body { font-family: Arial; max-width: 500px; margin: 40px auto; padding: 20px; }
-        input, select, button { width: 100%; padding: 10px; margin: 8px 0; font-size: 16px; }
-        button { background: #d32f2f; color: white; border: none; cursor: pointer; }
-        #status { color: green; font-weight: bold; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Assistance Request | Disaster Response</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h2>Emergency Help Request</h2>
-    <p id="status">Detecting your location...</p>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0 rounded-3">
+                    <div class="card-header bg-danger text-white text-center py-3">
+                        <h3 class="mb-0 fw-bold">Emergency Request Portal</h3>
+                        <small>Submit urgent help requests with live location</small>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
 
-    <form method="POST">
-        {% csrf_token %}
-        <label>Location (auto-detected):</label>
-        <input type="text" name="location" id="location" placeholder="Detecting..." required>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="disaster_type" class="form-label fw-semibold">Disaster / Emergency Type</label>
+                                <select name="disaster_type" id="disaster_type" class="form-select" required>
+                                    <option value="" selected disabled>Select Emergency Type...</option>
+                                    <option value="medical">Medical Emergency</option>
+                                    <option value="fire">Fire Incident</option>
+                                    <option value="flood">Flood Rescue</option>
+                                    <option value="food">Food & Shelter Requirement</option>
+                                </select>
+                            </div>
 
-        <input type="hidden" name="latitude" id="latitude">
-        <input type="hidden" name="longitude" id="longitude">
+                            <div class="mb-3">
+                                <label for="location" class="form-label fw-semibold">Location / Address</label>
+                                <div class="input-group">
+                                    <input type="text" name="location" id="location" class="form-control" placeholder="City or Street Address" required>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="getLocation()">Detect GPS</button>
+                                </div>
+                                <small id="geo-status" class="form-text text-muted"></small>
+                            </div>
 
-        <label>What do you need?</label>
-        <select name="need_type" required>
-            <option value="food">Food</option>
-            <option value="medical">Medical Help</option>
-            <option value="rescue_boat">Rescue Boat</option>
-            <option value="shelter">Shelter</option>
-        </select>
+                            <input type="hidden" name="latitude" id="latitude">
+                            <input type="hidden" name="longitude" id="longitude">
 
-        <label>Urgency:</label>
-        <select name="urgency" required>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
-        </select>
-
-        <button type="submit">Submit Request</button>
-    </form>
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-danger btn-lg fw-bold">Submit Emergency Alert</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                document.getElementById("latitude").value = position.coords.latitude;
-                document.getElementById("longitude").value = position.coords.longitude;
-                document.getElementById("location").value =
-                    position.coords.latitude.toFixed(4) + ", " + position.coords.longitude.toFixed(4);
-                document.getElementById("status").innerText = "Location detected successfully.";
-            }, function(error) {
-                document.getElementById("status").innerText = "Location access denied. Please type manually.";
-            });
-        } else {
-            document.getElementById("status").innerText = "Geolocation not supported. Please type manually.";
+        function getLocation() {
+            const status = document.getElementById('geo-status');
+            if (navigator.geolocation) {
+                status.innerText = "Fetching coordinates...";
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                        status.className = "form-text text-success";
+                        status.innerText = `GPS coordinates attached (${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)})`;
+                    },
+                    (error) => {
+                        status.className = "form-text text-danger";
+                        status.innerText = "Unable to fetch location. Please enter address manually.";
+                    }
+                );
+            } else {
+                status.innerText = "Geolocation is not supported by your browser.";
+            }
         }
     </script>
+    <script href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
