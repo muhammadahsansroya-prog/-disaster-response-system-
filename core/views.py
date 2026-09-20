@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import HelpRequest, Resource
+from .models import HelpRequest, Resource, DispatchLog
 
 def submit_request(request):
     if request.method == 'POST':
@@ -49,3 +49,36 @@ def update_request_status(request, request_id):
             messages.success(request, f"Status updated to '{new_status.title()}' successfully.")
             
     return redirect('responder_dashboard')
+
+
+@login_required
+def dispatch_dashboard(request):
+    if request.method == 'POST':
+        request_id = request.POST.get('request_id')
+        resource_id = request.POST.get('resource_id')
+        
+        help_req = get_object_or_404(HelpRequest, id=request_id)
+        resource = get_object_or_404(Resource, id=resource_id)
+        
+        # Dispatch record store karna
+        DispatchLog.objects.create(help_request=help_req, resource=resource)
+        
+        # Status automatically dispatch update karna
+        help_req.status = 'dispatched'
+        help_req.save()
+        
+        resource.status = 'dispatched'
+        resource.save()
+        
+        messages.success(request, f"Resource '{resource.resource_type}' assigned to {help_req.need_type} request successfully!")
+        return redirect('dispatch_dashboard')
+
+    requests = HelpRequest.objects.all().order_by('-created_at')
+    resources = Resource.objects.all()
+    dispatch_logs = DispatchLog.objects.all().order_by('-dispatched_at')
+    
+    return render(request, 'core/dispatch_dashboard.html', {
+        'requests': requests,
+        'resources': resources,
+        'dispatch_logs': dispatch_logs
+    })
