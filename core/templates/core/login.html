@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><title>Responder Login</title></head>
+<body style="font-family: Arial; max-width: 400px; margin: 60px auto;">
+    <h2>Responder Login</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" style="padding: 10px 20px;">Login</button>
+    </form>
+</body>
+</html>

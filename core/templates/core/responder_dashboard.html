@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>My Dispatch</title></head>
+<body style="font-family: Arial; max-width: 500px; margin: 40px auto;">
+    <h2>My Assigned Dispatch</h2>
+    {% if resources %}
+        {% for r in resources %}
+            <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
+                <strong>{{ r.resource_type }}</strong><br>
+                Location: {{ r.location }}<br>
+                Status: <strong>{{ r.status }}</strong>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No resources assigned to you yet.</p>
+    {% endif %}
+</body>
+</html>

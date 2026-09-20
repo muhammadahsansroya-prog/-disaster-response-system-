@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from .models import HelpRequest
+from django.contrib.auth.decorators import login_required
+from .models import HelpRequest, Resource
 
 def submit_request(request):
     if request.method == 'POST':
@@ -13,3 +14,9 @@ def submit_request(request):
         return render(request, 'core/success.html')
 
     return render(request, 'core/submit_request.html')
+
+
+@login_required
+def responder_dashboard(request):
+    my_resources = Resource.objects.filter(responder=request.user)
+    return render(request, 'core/responder_dashboard.html', {'resources': my_resources})

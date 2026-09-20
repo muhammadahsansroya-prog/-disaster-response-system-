@@ -45,6 +45,7 @@ class Resource(models.Model):
     latitude = models.FloatField(default=33.6844)
     longitude = models.FloatField(default=73.0479)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+    responder = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='resources')
 
     def __str__(self):
         return f"{self.resource_type} at {self.location} ({self.status})"
