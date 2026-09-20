@@ -14,5 +14,10 @@
     {% else %}
         <p>No resources assigned to you yet.</p>
     {% endif %}
+
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" style="margin-top: 20px; padding: 8px 16px;">Logout</button>
+    </form>
 </body>
 </html>
