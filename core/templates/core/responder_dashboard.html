@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responder Dashboard | Disaster Response</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 380px; width: 100%; border-radius: 8px; }
+    </style>
 </head>
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
@@ -20,7 +25,7 @@
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container pb-5">
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
@@ -30,16 +35,41 @@
             {% endfor %}
         {% endif %}
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold text-secondary">Emergency Requests List</h3>
-            <span class="badge bg-danger fs-6">Total Alerts: {{ requests.count }}</span>
+        <!-- Interactive Map Section -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white fw-bold">
+                Live Incident Map Location
+            </div>
+            <div class="card-body p-2">
+                <div id="map"></div>
+            </div>
         </div>
 
-        <div class="card shadow-sm border-0 mb-5">
+        <!-- Hidden data store for map markers -->
+        <div id="map-markers-data" style="display: none;">
+            {% for req in requests %}
+                {% if req.latitude and req.longitude %}
+                    <div class="marker-item"
+                         data-lat="{{ req.latitude }}"
+                         data-lng="{{ req.longitude }}"
+                         data-need="{{ req.need_type }}"
+                         data-urgency="{{ req.urgency }}"
+                         data-status="{{ req.status }}">
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Emergency Requests List -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">Emergency Requests List</h5>
+                <span class="badge bg-light text-danger fs-6">Total Alerts: {{ requests.count }}</span>
+            </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-dark">
+                        <thead class="table-light">
                             <tr>
                                 <th>Emergency Need</th>
                                 <th>Location</th>
@@ -54,33 +84,25 @@
                                 <td class="fw-bold text-capitalize">{{ req.need_type }}</td>
                                 <td>{{ req.location }}</td>
                                 <td>
-                                    {% if req.urgency == 'critical' or req.urgency == 'high' %}
-                                        <span class="badge bg-danger">{{ req.urgency|upper }}</span>
-                                    {% elif req.urgency == 'medium' %}
-                                        <span class="badge bg-warning text-dark">{{ req.urgency|upper }}</span>
+                                    {% if req.urgency == 'critical' %}
+                                        <span class="badge bg-danger">CRITICAL</span>
+                                    {% elif req.urgency == 'high' %}
+                                        <span class="badge bg-warning text-dark">HIGH</span>
                                     {% else %}
-                                        <span class="badge bg-info text-dark">{{ req.urgency|upper }}</span>
+                                        <span class="badge bg-info text-dark">MEDIUM</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if req.status == 'pending' %}
-                                        <span class="badge bg-secondary">Pending</span>
-                                    {% elif req.status == 'matched' %}
-                                        <span class="badge bg-info text-dark">Matched</span>
-                                    {% elif req.status == 'dispatched' %}
-                                        <span class="badge bg-primary">Dispatched</span>
-                                    {% elif req.status == 'completed' %}
-                                        <span class="badge bg-success">Completed</span>
-                                    {% endif %}
+                                    <span class="badge bg-secondary text-capitalize">{{ req.status }}</span>
                                 </td>
                                 <td>
                                     <form action="{% url 'update_request_status' req.id %}" method="POST" class="d-flex gap-2">
                                         {% csrf_token %}
                                         <select name="status" class="form-select form-select-sm" style="width: 140px;">
                                             <option value="pending" {% if req.status == 'pending' %}selected{% endif %}>Pending</option>
-                                            <option value="matched" {% if req.status == 'matched' %}selected{% endif %}>Matched</option>
                                             <option value="dispatched" {% if req.status == 'dispatched' %}selected{% endif %}>Dispatched</option>
-                                            <option value="completed" {% if req.status == 'completed' %}selected{% endif %}>Completed</option>
+                                            <option value="in_progress" {% if req.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                            <option value="resolved" {% if req.status == 'resolved' %}selected{% endif %}>Resolved</option>
                                         </select>
                                         <button type="submit" class="btn btn-sm btn-dark">Save</button>
                                     </form>
@@ -88,7 +110,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">No emergency requests found.</td>
+                                <td colspan="5" class="text-center py-4 text-muted">No emergency requests active.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -97,6 +119,32 @@
             </div>
         </div>
     </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([30.6511, 73.1394], 10);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+}).addTo(map);
+
+        var markerElements = document.querySelectorAll('.marker-item');
+        markerElements.forEach(function(item) {
+            var lat = parseFloat(item.getAttribute('data-lat'));
+            var lng = parseFloat(item.getAttribute('data-lng'));
+            var need = item.getAttribute('data-need');
+            var urgency = item.getAttribute('data-urgency').toUpperCase();
+            var status = item.getAttribute('data-status');
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+                L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup("<b>Need:</b> " + need + "<br><b>Urgency:</b> " + urgency + "<br><b>Status:</b> " + status);
+            }
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
