@@ -3,6 +3,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import HelpRequest, Resource, DispatchLog
 
+
+def home(request):
+    """Central Home Landing Page View"""
+    return render(request, 'core/index.html')
+
+
 def submit_request(request):
     if request.method == 'POST':
         need_type = request.POST.get('disaster_type') or request.POST.get('need_type')

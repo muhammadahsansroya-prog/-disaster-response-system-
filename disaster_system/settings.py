@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-qr44t346x7ey1(bma^d=zcx)8)mgwqyuh23fnxib_o124jw5uw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+'whitenoise.middleware.WhiteNoiseMiddleware',
 
 ROOT_URLCONF = 'disaster_system.urls'
 
@@ -121,3 +122,6 @@ STATIC_URL = 'static/'
 # Authentication Redirects
 LOGIN_REDIRECT_URL = '/responder/'
 LOGOUT_REDIRECT_URL = '/login/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

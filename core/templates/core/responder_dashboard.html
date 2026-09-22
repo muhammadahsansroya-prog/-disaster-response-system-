@@ -14,7 +14,7 @@
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">Responder Control Panel</a>
+            <a class="navbar-brand fw-bold" href="{% url 'home' %}">Responder Control Panel</a>
             <div class="d-flex align-items-center text-white">
                 <span class="me-3">Logged in as: <strong>{{ request.user.username }}</strong></span>
                 <form action="{% url 'logout' %}" method="post" class="d-inline">
@@ -123,12 +123,14 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([30.6511, 73.1394], 10);
+        var map = L.map('map').setView([30.6511, 73.1394], 12);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-}).addTo(map);
+        // Google Maps Standard Roads Layer (No API Key Required)
+        L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; Google Maps'
+        }).addTo(map);
 
         var markerElements = document.querySelectorAll('.marker-item');
         markerElements.forEach(function(item) {
