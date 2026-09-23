@@ -1,302 +1,304 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Punjab Disaster Response & Resource Allocation System | PM M. Ahsan Relief Program</title>
+    <title>PDRRAS Command | PM M. Ahsan Relief Program</title>
     
-    <!-- Tailwind CSS & FontAwesome -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Leaflet.js (Open Source Interactive Live Map) -->
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        hazard: '#ef4444',
-                        command: '#0f172a',
-                        ops: '#1e293b'
-                    }
-                }
-            }
-        }
-    </script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        
-        .disaster-overlay {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0.98) 100%), 
-                        url('https://images.unsplash.com/photo-1547683905-f686c993aae5?q=80&w=1920&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        #map { height: 450px; border-radius: 1rem; z-index: 1; }
-        
-        .pulse-critical {
-            animation: pulse-red 2s infinite;
-        }
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
+        #map { height: 480px; width: 100%; border-radius: 1rem; z-index: 10; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-red-600 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <!-- Top Command Header -->
-    <header class="bg-slate-900/90 backdrop-blur-md border-b border-red-900/40 sticky top-0 z-50 py-3 px-4 sm:px-8">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            
-            <!-- Brand & Official Designation -->
-            <div class="flex items-center space-x-3">
-                <div class="bg-red-600 text-white p-2.5 rounded-xl font-black flex items-center justify-center w-11 h-11 shadow-lg shadow-red-600/30 pulse-critical">
-                    <i class="fa-solid fa-building-columns text-xl"></i>
+    <!-- Top Emergency Announcement Bar -->
+    <div class="bg-red-700 text-white text-xs py-1 px-4 font-semibold text-center tracking-wider uppercase flex items-center justify-center gap-2">
+        <span class="animate-ping inline-flex h-2 w-2 rounded-full bg-white opacity-75"></span>
+        <span>National Crisis Directive: Full Disaster Deployment Active Across Punjab Sectors</span>
+    </div>
+
+    <!-- Command Navbar -->
+    <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-red-600 rounded-xl text-white shadow-lg shadow-red-600/30">
+                    <i class="fa-solid font-bold text-xl fa-shield-halved"></i>
                 </div>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="font-extrabold text-lg tracking-wider text-white uppercase">PDRRAS Command</h1>
-                        <span class="bg-red-600/20 text-red-400 border border-red-500/30 text-[10px] font-extrabold px-2 py-0.5 rounded tracking-widest uppercase">DEFCON 1</span>
-                    </div>
-                    <p class="text-[11px] text-amber-400 font-bold uppercase tracking-wide">Prime Minister: M. Ahsan Relief Program</p>
+                    <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                        PDRRAS COMMAND
+                        <span class="text-xs font-semibold px-2 py-0.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded">DEFCON 1</span>
+                    </h1>
+                    <p class="text-xs font-medium text-amber-400">PRIME MINISTER: M. AHSAN RELIEF PROGRAM</p>
                 </div>
             </div>
 
-            <!-- Operational Menu -->
-            <nav class="hidden lg:flex items-center space-x-6 text-xs font-bold uppercase tracking-wider text-slate-300">
-                <a href="#live-map" class="hover:text-red-400 transition"><i class="fa-solid fa-map-location-dot text-red-500 mr-1.5"></i> Punjab Tactical Map</a>
-                <a href="#resources" class="hover:text-red-400 transition"><i class="fa-solid fa-boxes-stacked text-amber-500 mr-1.5"></i> Relief Warehouses</a>
-                <a href="#victim-portal" class="hover:text-red-400 transition"><i class="fa-solid fa-hand-holding-hand text-emerald-500 mr-1.5"></i> Emergency SOS</a>
+            <nav class="flex items-center gap-6 text-sm font-medium text-slate-300">
+                <a href="#map-section" class="hover:text-red-400 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-map-location-dot text-red-500"></i> Tactical Map
+                </a>
+                <a href="#resources-section" class="hover:text-red-400 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-boxes-stacked text-amber-500"></i> Relief Warehouses
+                </a>
+                <a href="#sos-section" class="hover:text-red-400 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt text-red-500"></i> Emergency SOS
+                </a>
             </nav>
 
-            <!-- Authentication Actions -->
-            <div class="flex items-center space-x-3">
-                <a href="{% url 'signup' %}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition shadow-lg shadow-red-600/30 flex items-center gap-2">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span>Register Response Unit</span>
+            <div class="flex items-center gap-3">
+                <a href="#sos-section" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg shadow-lg shadow-red-600/20 transition-all uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-shield-cat"></i> Register Response Unit
                 </a>
-                <a href="{% url 'login' %}" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition">
+                <a href="/admin/" target="_blank" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition-all">
                     Command Login
                 </a>
             </div>
         </div>
     </header>
 
-    <!-- Emergency Broadcast Alert Ticker -->
-    <div class="bg-red-950/90 border-b border-red-800/60 py-2.5 px-4 text-xs font-semibold text-red-200">
-        <div class="max-w-7xl mx-auto flex items-center space-x-3 overflow-hidden">
-            <span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-md tracking-widest uppercase shrink-0 animate-pulse">PM RELIEF DIRECTIVE</span>
-            <marquee class="whitespace-nowrap font-mono tracking-wide">
-                [PRIME MINISTER M. AHSAN RELIEF CELL] Flash Flood Alerts in South Punjab • Direct Ration Dispatches Initiated Across Sahiwal & Multan Divisions • Emergency Helpline: 1122
-            </marquee>
-        </div>
-    </div>
+    <!-- Hero / Live Tactical Overview -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-10">
 
-    <!-- Main Hero Section -->
-    <section class="disaster-overlay py-16 px-4 sm:px-8 border-b border-slate-800 relative">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                
-                <div class="lg:col-span-7 space-y-6">
-                    <div class="inline-flex items-center gap-2 bg-slate-900/80 border border-amber-500/40 px-3.5 py-1.5 rounded-full">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-                        <span class="text-xs text-amber-300 font-extrabold tracking-wide uppercase">Prime Minister: M. Ahsan Relief Program</span>
-                    </div>
+        <!-- Stat Counters -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-panel p-5 rounded-2xl border-l-4 border-red-500 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Critical SOS</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="active-sos-count">24</h3>
+                    <p class="text-xs text-red-400 mt-1"><i class="fa-solid fa-arrow-up"></i> Priority Response Active</p>
+                </div>
+                <div class="p-3 bg-red-500/10 text-red-500 rounded-xl">
+                    <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                </div>
+            </div>
 
-                    <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight">
-                        Punjab Disaster Response & <span class="text-red-500 underline decoration-red-600/50">Resource Allocation System</span>
-                    </h1>
+            <div class="glass-panel p-5 rounded-2xl border-l-4 border-emerald-500 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Field Taskforce Units</p>
+                    <h3 class="text-3xl font-black text-white mt-1">128</h3>
+                    <p class="text-xs text-emerald-400 mt-1"><i class="fa-solid fa-check"></i> Deployed across Punjab</p>
+                </div>
+                <div class="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl">
+                    <i class="fa-solid fa-truck-droplet text-2xl"></i>
+                </div>
+            </div>
 
-                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-normal">
-                        Official Provincial Emergency Portal under the special directive of Prime Minister M. Ahsan for real-time flood response, casualty evacuation, and automated resource supply dispatch across Punjab.
-                    </p>
+            <div class="glass-panel p-5 rounded-2xl border-l-4 border-amber-500 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ration Packs Dispatched</p>
+                    <h3 class="text-3xl font-black text-white mt-1">14,250</h3>
+                    <p class="text-xs text-amber-400 mt-1"><i class="fa-solid fa-box-open"></i> PM Relief Stock</p>
+                </div>
+                <div class="p-3 bg-amber-500/10 text-amber-500 rounded-xl">
+                    <i class="fa-solid fa-wheat-awn text-2xl"></i>
+                </div>
+            </div>
 
-                    <!-- Real-Time Metrics Widget -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
-                        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-center">
-                            <p class="text-[11px] font-bold text-slate-400 uppercase">Active Punjab SOS</p>
-                            <h3 class="text-2xl font-black text-red-500 mt-1" id="active-sos-count">214</h3>
-                        </div>
-                        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-center">
-                            <p class="text-[11px] font-bold text-slate-400 uppercase">Rescue Teams</p>
-                            <h3 class="text-2xl font-black text-emerald-400 mt-1" id="rescuers-count">120</h3>
-                        </div>
-                        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-center">
-                            <p class="text-[11px] font-bold text-slate-400 uppercase">PM Rations Delivered</p>
-                            <h3 class="text-2xl font-black text-amber-400 mt-1">28,400 Bags</h3>
-                        </div>
-                        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-center">
-                            <p class="text-[11px] font-bold text-slate-400 uppercase">Evacuated Citizens</p>
-                            <h3 class="text-2xl font-black text-blue-400 mt-1">8,920</h3>
-                        </div>
-                    </div>
+            <div class="glass-panel p-5 rounded-2xl border-l-4 border-blue-500 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Citizens Evacuated</p>
+                    <h3 class="text-3xl font-black text-white mt-1">3,890</h3>
+                    <p class="text-xs text-blue-400 mt-1"><i class="fa-solid fa-heart-pulse"></i> Safe Zones Established</p>
+                </div>
+                <div class="p-3 bg-blue-500/10 text-blue-500 rounded-xl">
+                    <i class="fa-solid fa-person-shelter text-2xl"></i>
+                </div>
+            </div>
+        </section>
 
-                    <div class="pt-4 flex flex-wrap gap-4">
-                        <a href="#victim-portal" class="bg-red-600 hover:bg-red-700 text-white text-sm font-extrabold px-8 py-4 rounded-2xl shadow-xl shadow-red-600/30 transition flex items-center space-x-3">
-                            <i class="fa-solid fa-triangle-exclamation text-lg"></i>
-                            <span>Request PM Relief Emergency SOS</span>
-                        </a>
-                        <a href="#resources" class="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-sm font-extrabold px-6 py-4 rounded-2xl transition flex items-center space-x-2">
-                            <i class="fa-solid fa-warehouse text-amber-400"></i>
-                            <span>Check Punjab Warehouse Stock</span>
-                        </a>
-                    </div>
+        <!-- Tactical Map Section -->
+        <section id="map-section" class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-map-pinned text-red-500"></i> PUNJAB TACTICAL OPERATIONS MAP
+                    </h2>
+                    <p class="text-xs text-slate-400">Live monitoring under Prime Minister M. Ahsan Relief Directives</p>
+                </div>
+                <div class="flex items-center gap-4 text-xs">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500"></span> Critical SOS</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Active Rescuer</span>
+                </div>
+            </div>
+
+            <div class="relative overflow-hidden rounded-2xl border border-slate-800 shadow-2xl">
+                <div id="map"></div>
+            </div>
+        </section>
+
+        <!-- Request Emergency Help & Dynamic Warehouse Grid -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- SOS Dispatch Form -->
+            <div id="sos-section" class="glass-panel p-6 rounded-2xl border border-red-500/20 lg:col-span-1 space-y-4">
+                <div class="border-b border-slate-800 pb-3">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-red-500"></i> TRANSMIT EMERGENCY SOS
+                    </h3>
+                    <p class="text-xs text-slate-400">Direct dispatch request to PM Taskforce Command Cell</p>
                 </div>
 
-                <!-- Emergency SOS Form -->
-                <div class="lg:col-span-5 bg-slate-900/90 border border-red-600/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5" id="victim-portal">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                        <div>
-                            <h2 class="text-xl font-black text-white">Emergency Assistance SOS</h2>
-                            <p class="text-xs text-amber-400 font-semibold">Direct Dispatch to PM Relief Taskforce</p>
-                        </div>
-                        <span class="bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Level 1 Urgent</span>
+                <form onsubmit="event.preventDefault(); triggerSOS();" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Citizen Full Name</label>
+                        <input type="text" required placeholder="e.g. Muhammad Ahsan" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
                     </div>
 
-                    <form class="space-y-4" onsubmit="event.preventDefault(); triggerSOS();">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Citizen Full Name</label>
-                            <input type="text" placeholder="e.g. Muhammad Ahsan" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-red-500 transition" required>
-                        </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Contact Phone Number</label>
+                        <input type="tel" required placeholder="0332 8460515" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+                    </div>
 
-                        <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Emergency Category</label>
+                        <select class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+                            <option>Flash Flood Evacuation Required</option>
+                            <option>Medical Casualty / Team Required</option>
+                            <option>PM Food Ration & Drinking Water</option>
+                            <option>Structural Collapse Rescue</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Sector / Location Marker</label>
+                        <input type="text" id="gps-coords" placeholder="Detecting Live GPS..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Affected Persons Count</label>
+                        <input type="number" min="1" value="4" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-lg shadow-red-600/30 text-sm tracking-wider uppercase transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> Dispatch Rescue Unit
+                    </button>
+                </form>
+            </div>
+
+            <!-- Active Warehouses & Stock Tracker -->
+            <div id="resources-section" class="glass-panel p-6 rounded-2xl border border-slate-800 lg:col-span-2 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-warehouse text-amber-500"></i> PM RELIEF CENTRAL WAREHOUSES
+                        </h3>
+                        <p class="text-xs text-slate-400">Real-time resource allocation and inventory status</p>
+                    </div>
+                    <span class="text-xs px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-semibold">Live Inventory</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Resource Card 1 -->
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between items-start">
                             <div>
-                                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Emergency Category</label>
-                                <select class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-xs text-white focus:outline-none focus:border-red-500 transition">
-                                    <option>🌊 Flash Flood Evacuation</option>
-                                    <option>🏥 Medical Emergency</option>
-                                    <option>🍞 PM Food Supply Ration</option>
-                                    <option>🛖 Structural Collapse Rescue</option>
-                                </select>
+                                <h4 class="font-bold text-sm text-white">Central Sahiwal Depot</h4>
+                                <p class="text-xs text-slate-400">PM Food Ration Packs</p>
                             </div>
+                            <span class="px-2 py-0.5 text-xs bg-emerald-500/20 text-emerald-400 font-bold rounded">Available</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full w-4/5"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span>Stock: 850 / 1000 Packs</span>
+                            <span class="text-emerald-400 font-semibold">85% Stock Ready</span>
+                        </div>
+                    </div>
+
+                    <!-- Resource Card 2 -->
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between items-start">
                             <div>
-                                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Persons Stranded</label>
-                                <input type="number" min="1" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-red-500 transition" required>
+                                <h4 class="font-bold text-sm text-white">Motorboat Rescue Wing #01</h4>
+                                <p class="text-xs text-slate-400">Rescue Boats & Vests</p>
                             </div>
+                            <span class="px-2 py-0.5 text-xs bg-blue-500/20 text-blue-400 font-bold rounded">Dispatched</span>
                         </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-blue-500 h-full w-3/5"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span>Units: 18 / 30 Boats</span>
+                            <span class="text-blue-400 font-semibold">Field Active</span>
+                        </div>
+                    </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Location GPS</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="gps-coords" placeholder="Fetching Location..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-400 font-mono" readonly>
-                                <button type="button" onclick="getGPS()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 rounded-xl text-xs font-bold transition shrink-0">
-                                    <i class="fa-solid fa-location-crosshairs text-red-500"></i>
-                                </button>
+                    <!-- Resource Card 3 -->
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-sm text-white">Medical Rapid Relief Wing</h4>
+                                <p class="text-xs text-slate-400">Emergency Trauma Kits</p>
                             </div>
+                            <span class="px-2 py-0.5 text-xs bg-emerald-500/20 text-emerald-400 font-bold rounded">Available</span>
                         </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full w-11/12"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span>Stock: 460 / 500 Kits</span>
+                            <span class="text-emerald-400 font-semibold">92% Ready</span>
+                        </div>
+                    </div>
 
-                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs uppercase tracking-wider py-4 rounded-xl shadow-lg shadow-red-600/30 transition flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-paper-plane"></i>
-                            <span>Transmit SOS to PM Relief Cell</span>
-                        </button>
-                    </form>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Live Tactical Map -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-8 py-12 w-full" id="live-map">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <div>
-                <h2 class="text-2xl font-black text-white uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-map-location-dot text-red-500"></i> Punjab Tactical Operations Map
-                </h2>
-                <p class="text-xs text-slate-400">Live monitoring under Prime Minister M. Ahsan Relief Directives</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="flex items-center gap-1.5 text-xs text-slate-300"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Critical SOS</span>
-                <span class="flex items-center gap-1.5 text-xs text-slate-300"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Active Rescuer</span>
-            </div>
-        </div>
-
-        <div id="map" class="shadow-2xl border border-slate-800"></div>
-    </section>
-
-    <!-- Resource Inventory Depot -->
-    <section class="bg-slate-900/60 border-y border-slate-800 py-12 px-4 sm:px-8 w-full" id="resources">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-10">
-                <h2 class="text-2xl font-black text-white uppercase tracking-wider">PM Relief Program Warehouses</h2>
-                <p class="text-xs text-slate-400 mt-1">Real-time Punjab Provincial Resource Stock Allocation</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-amber-400 uppercase"><i class="fa-solid fa-boxes-packing mr-1"></i> PM Food Packs</span>
-                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Depot Sahiwal</span>
-                    </div>
-                    <div class="flex justify-between items-end">
-                        <h3 class="text-3xl font-black text-white">25,000 <span class="text-xs text-slate-400">Bags</span></h3>
-                        <span class="text-xs font-bold text-emerald-400">88% Stock</span>
-                    </div>
-                    <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                        <div class="bg-emerald-500 h-full w-[88%]"></div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-blue-400 uppercase"><i class="fa-solid fa-bottle-water mr-1"></i> Clean Water</span>
-                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Depot Multan</span>
-                    </div>
-                    <div class="flex justify-between items-end">
-                        <h3 class="text-3xl font-black text-white">60,000 <span class="text-xs text-slate-400">Liters</span></h3>
-                        <span class="text-xs font-bold text-emerald-400">95% Stock</span>
-                    </div>
-                    <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                        <div class="bg-emerald-500 h-full w-[95%]"></div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-red-400 uppercase"><i class="fa-solid fa-kit-medical mr-1"></i> Medical Kits</span>
-                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">HQ Lahore</span>
-                    </div>
-                    <div class="flex justify-between items-end">
-                        <h3 class="text-3xl font-black text-white">850 <span class="text-xs text-slate-400">Units</span></h3>
-                        <span class="text-xs font-bold text-emerald-400">70% Stock</span>
-                    </div>
-                    <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                        <div class="bg-emerald-500 h-full w-[70%]"></div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-purple-400 uppercase"><i class="fa-solid fa-ship mr-1"></i> Rescue Boats</span>
-                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Sector South</span>
-                    </div>
-                    <div class="flex justify-between items-end">
-                        <h3 class="text-3xl font-black text-white">82 <span class="text-xs text-slate-400">Boats</span></h3>
-                        <span class="text-xs font-bold text-amber-400">75% Active</span>
-                    </div>
-                    <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                        <div class="bg-amber-500 h-full w-[75%]"></div>
+                    <!-- Resource Card 4 -->
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-sm text-white">High-Ground Shelter Depot</h4>
+                                <p class="text-xs text-slate-400">Waterproof Relief Tents</p>
+                            </div>
+                            <span class="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 font-bold rounded">In Deployment</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-amber-500 h-full w-1/2"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-400">
+                            <span>Stock: 150 / 300 Tents</span>
+                            <span class="text-amber-400 font-semibold">50% Allocated</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+
+        </section>
+
+    </main>
 
     <!-- Footer -->
-    <footer class="bg-slate-950 border-t border-slate-800 py-6 px-4 text-center text-xs text-slate-500">
-        <p>© 2026 Punjab Disaster Response and Resource Allocation System | Prime Minister: M. Ahsan Relief Program. All Rights Reserved.</p>
+    <footer class="border-t border-slate-800 bg-slate-900 py-6 text-xs text-slate-400 mt-12">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <p class="font-bold text-slate-200">PDRRAS | Punjab Disaster Response and Resource Allocation System</p>
+                <p class="text-slate-500">Official Command Initiative — Prime Minister: M. Ahsan Relief Program</p>
+            </div>
+            <div class="text-right">
+                <p class="text-slate-400">Engineered with Python, Django & Leaflet GIS</p>
+                <p class="text-slate-500">HQ Coordinate Sector: 30.6682° N, 73.1114° E</p>
+            </div>
+        </div>
     </footer>
 
-    <!-- Interactive JS -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Interactive Map Script -->
     <script>
         function getGPS() {
             if (navigator.geolocation) {
@@ -311,9 +313,14 @@
         }
         getGPS();
 
+        // Leaflet Map Initialization
         const map = L.map('map').setView([30.6682, 73.1114], 9);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+
+        // Reliable CartoDB Dark Matter Tiles (Solves 403 Access Blocked Issue)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
         }).addTo(map);
 
         const redIcon = L.icon({
