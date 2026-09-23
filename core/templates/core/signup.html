@@ -1,200 +1,654 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responder Registration - Disaster Response System</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create Account - Disaster Response System</title>
+<style>
+  :root{
+    --navy-950:#0a0f1a;
+    --navy-900:#0f1826;
+    --navy-800:#152238;
+    --navy-700:#1c2d48;
+    --steel-400:#7c8ba1;
+    --steel-200:#c3ccd9;
+    --paper:#eef1f6;
+    --red-600:#c0392b;
+    --red-500:#d64535;
+    --red-400:#e2604f;
+    --amber-500:#d9932e;
+    --ok-500:#3a9d6f;
+    --radius:10px;
+    --shadow-lg:0 20px 50px rgba(0,0,0,0.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:"Segoe UI",Arial,Helvetica,sans-serif;
+    background:
+      radial-gradient(circle at 12% 18%, rgba(214,69,53,0.10), transparent 32%),
+      radial-gradient(circle at 88% 82%, rgba(58,157,111,0.08), transparent 30%),
+      linear-gradient(160deg, var(--navy-950) 0%, var(--navy-900) 55%, var(--navy-800) 100%);
+    color:var(--paper);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* --- subtle background service icons (ambulance, medical cross, boat, life ring) --- */
+  .bg-icon{
+    position:absolute;
+    opacity:0.05;
+    stroke:var(--paper);
+    fill:none;
+    stroke-width:1.2;
+    pointer-events:none;
+  }
+  .bg-icon.i1{ top:6%; left:5%; width:130px; transform:rotate(-6deg);}
+  .bg-icon.i2{ bottom:8%; right:6%; width:150px; transform:rotate(4deg);}
+  .bg-icon.i3{ top:58%; left:3%; width:90px; transform:rotate(10deg);}
+  .bg-icon.i4{ top:10%; right:8%; width:100px; transform:rotate(-8deg);}
+
+  .topbar{
+    position:fixed; top:0; left:0; right:0;
+    display:flex; align-items:center; gap:10px;
+    padding:14px 24px;
+    background:rgba(10,15,26,0.75);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    backdrop-filter:blur(6px);
+    z-index:5;
+  }
+  .topbar .mark{
+    width:30px;height:30px;border-radius:7px;
+    background:linear-gradient(135deg, var(--red-500), var(--red-600));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(214,69,53,0.35);
+  }
+  .topbar .mark svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2;}
+  .topbar .brand{font-size:14px;font-weight:600;letter-spacing:0.4px;color:var(--steel-200);}
+  .topbar .tag{
+    margin-left:auto;font-size:11px;color:var(--steel-400);
+    border:1px solid rgba(255,255,255,0.12); padding:4px 10px;border-radius:20px;
+    letter-spacing:0.6px;
+  }
+
+  .card{
+    position:relative;
+    z-index:2;
+    width:100%;
+    max-width:720px;
+    background:linear-gradient(180deg, rgba(21,34,56,0.92), rgba(15,24,38,0.95));
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px;
+    box-shadow:var(--shadow-lg);
+    padding:38px 40px 32px;
+    margin-top:56px;
+  }
+
+  .header{ text-align:center; margin-bottom:26px; }
+  .header .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(214,69,53,0.12);
+    border:1px solid rgba(214,69,53,0.35);
+    color:var(--red-400);
+    font-size:11.5px; font-weight:600; letter-spacing:1px;
+    padding:6px 14px; border-radius:20px; text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .header .badge svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+  .header h1{
+    margin:0 0 6px; font-size:26px; font-weight:700; letter-spacing:0.3px;
+    color:var(--paper);
+  }
+  .header p{ margin:0; font-size:13.5px; color:var(--steel-400); }
+
+  /* progress */
+  .progress{ display:flex; align-items:center; justify-content:center; gap:8px; margin:24px 0 30px; }
+  .progress .dot-wrap{ display:flex; align-items:center; gap:8px; }
+  .progress .num{
+    width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;
+    background:var(--navy-700); color:var(--steel-400);
+    border:1px solid rgba(255,255,255,0.12);
+    transition:all .25s ease;
+  }
+  .progress .label{font-size:11px;color:var(--steel-400);letter-spacing:0.3px;}
+  .progress .line{ width:38px; height:2px; background:rgba(255,255,255,0.12); }
+  .progress .num.done{ background:var(--ok-500); color:#fff; border-color:var(--ok-500); }
+  .progress .label.done{ color:var(--paper); }
+  .progress .line.done{ background:var(--ok-500); }
+  .progress .num.active{ background:var(--red-500); color:#fff; border-color:var(--red-500); }
+  .progress .label.active{ color:var(--paper); }
+
+  select{
+    background:var(--navy-950);
+    border:1px solid rgba(255,255,255,0.10);
+    color:var(--paper);
+    border-radius:8px;
+    padding:11px 13px;
+    font-size:13.5px;
+    font-family:inherit;
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c8ba1' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    background-size:16px;
+    padding-right:36px;
+  }
+  select:focus{ border-color:var(--red-500); box-shadow:0 0 0 3px rgba(214,69,53,0.15); }
+  select:disabled{ opacity:0.5; cursor:not-allowed; }
+  select option{ background:var(--navy-950); color:var(--paper); }
+
+  /* OTP step */
+  .otp-copy{ text-align:center; font-size:13px; color:var(--steel-400); margin-bottom:22px; line-height:1.6; }
+  .otp-copy strong{ color:var(--paper); }
+  .otp-boxes{ display:flex; justify-content:center; gap:10px; margin-bottom:18px; }
+  .otp-boxes input{
+    width:46px; height:54px; text-align:center; font-size:20px; font-weight:700;
+    padding:0;
+  }
+  .otp-timer{ text-align:center; font-size:12.5px; color:var(--steel-400); margin-bottom:6px; }
+  .otp-timer .resend{ color:var(--red-400); font-weight:600; cursor:pointer; background:none; border:none; font-size:12.5px; }
+  .otp-timer .resend:disabled{ color:var(--steel-400); cursor:not-allowed; }
+  .otp-status{ text-align:center; font-size:12px; margin-top:8px; min-height:16px; }
+  .otp-status.ok{ color:var(--ok-500); }
+  .otp-status.err{ color:var(--red-400); }
+
+  form{ position:relative; }
+  .step{ display:none; }
+  .step.active{ display:block; animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px 20px; }
+  .field{ display:flex; flex-direction:column; gap:7px; }
+  .field.full{ grid-column:1 / -1; }
+  label{ font-size:12.5px; font-weight:600; color:var(--steel-200); letter-spacing:0.3px; }
+  label .opt{ font-weight:400; color:var(--steel-400); font-size:11px; }
+
+  input, textarea{
+    background:var(--navy-950);
+    border:1px solid rgba(255,255,255,0.10);
+    color:var(--paper);
+    border-radius:8px;
+    padding:11px 13px;
+    font-size:13.5px;
+    font-family:inherit;
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea{ resize:vertical; min-height:64px; }
+  input::placeholder, textarea::placeholder{ color:#54617a; }
+  input:focus, textarea:focus{
+    border-color:var(--red-500);
+    box-shadow:0 0 0 3px rgba(214,69,53,0.15);
+  }
+  input.error{ border-color:var(--red-500); box-shadow:0 0 0 3px rgba(214,69,53,0.15); }
+  .hint{ font-size:11px; color:var(--steel-400); }
+  .hint.err{ color:var(--red-400); display:none; }
+
+  .pw-wrap{ position:relative; }
+  .pw-wrap input{ width:100%; padding-right:38px; }
+  .pw-toggle{
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; padding:4px; color:var(--steel-400);
+  }
+  .pw-toggle svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; }
+
+  .strength{ height:4px; border-radius:3px; background:var(--navy-700); overflow:hidden; margin-top:2px; }
+  .strength-fill{ height:100%; width:0%; background:var(--red-500); transition:width .2s ease, background .2s ease; }
+
+  .actions{ display:flex; justify-content:space-between; align-items:center; margin-top:30px; gap:14px; }
+  .btn{
+    border:none; cursor:pointer; font-size:13.5px; font-weight:600;
+    padding:12px 26px; border-radius:8px; letter-spacing:0.3px;
+    transition:transform .1s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--red-500), var(--red-600));
+    color:#fff; box-shadow:0 10px 24px rgba(214,69,53,0.30);
+    margin-left:auto;
+  }
+  .btn-primary:hover{ box-shadow:0 12px 28px rgba(214,69,53,0.42); }
+  .btn-ghost{
+    background:transparent; color:var(--steel-200);
+    border:1px solid rgba(255,255,255,0.14);
+  }
+  .btn-ghost:hover{ border-color:rgba(255,255,255,0.3); }
+
+  .footnote{
+    text-align:center; margin-top:22px; font-size:12.5px; color:var(--steel-400);
+  }
+  .footnote a{ color:var(--red-400); text-decoration:none; font-weight:600; }
+  .footnote a:hover{ text-decoration:underline; }
+
+  .trust-row{
+    display:flex; justify-content:center; gap:22px; margin-top:24px;
+    padding-top:18px; border-top:1px solid rgba(255,255,255,0.06);
+    flex-wrap:wrap;
+  }
+  .trust-item{ display:flex; align-items:center; gap:7px; font-size:11px; color:var(--steel-400); }
+  .trust-item svg{ width:14px; height:14px; stroke:var(--ok-500); fill:none; stroke-width:2; }
+
+  @media (max-width:600px){
+    .grid{ grid-template-columns:1fr; }
+    .card{ padding:28px 22px 24px; }
+    .progress .line{ width:32px; }
+  }
+</style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
+<body>
 
-    <!-- Official Top Gov-Style Header Bar -->
-    <header class="bg-slate-900 text-white border-b-4 border-red-600 py-3 px-6 shadow-md">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-red-600 text-white p-2.5 rounded-lg font-bold text-xl flex items-center justify-center w-10 h-10 shadow">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight uppercase tracking-wide">National Disaster Response Portal</h1>
-                    <p class="text-xs text-slate-400">Government Emergency & Relief Coordination Unit</p>
-                </div>
-            </div>
-            <div class="hidden md:flex items-center space-x-4 text-xs text-slate-300">
-                <span><i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i> Official Portal</span>
-                <span>|</span>
-                <span><i class="fa-solid fa-headset text-red-400 mr-1"></i> Helpline: 1122 / 1058</span>
-            </div>
+  <!-- background watermark icons: ambulance, medical cross, boat, life ring -->
+  <svg class="bg-icon i1" viewBox="0 0 64 64"><rect x="4" y="26" width="40" height="18" rx="2"/><path d="M44 32h10l6 8v4H44z"/><circle cx="16" cy="46" r="5"/><circle cx="48" cy="46" r="5"/><path d="M14 26v-8h12v8"/><path d="M17 14v8M13 18h8"/></svg>
+  <svg class="bg-icon i2" viewBox="0 0 64 64"><path d="M6 40c6 10 46 10 52 0"/><path d="M10 40l4-16h36l4 16"/><rect x="26" y="10" width="12" height="14" rx="1"/><path d="M29 14h6M32 11v7"/></svg>
+  <svg class="bg-icon i3" viewBox="0 0 64 64"><rect x="14" y="10" width="36" height="36" rx="3"/><path d="M26 10V4h12v6M20 46v6h24v-6"/><path d="M26 24h12M32 18v12"/></svg>
+  <svg class="bg-icon i4" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="10"/><path d="M32 10v12M32 42v12M10 32h12M42 32h12"/></svg>
+
+  <div class="topbar">
+    <div class="mark"><svg viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5 3.8 9.5 9 10 5.2-.5 9-5 9-10V6l-9-4Z"/><path d="M12 8v6M9 11h6"/></svg></div>
+    <div class="brand">DISASTER RESPONSE SYSTEM</div>
+    <div class="tag">Responder Portal</div>
+  </div>
+
+  <div class="card">
+    <div class="header">
+      <div class="badge">
+        <svg viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5 3.8 9.5 9 10 5.2-.5 9-5 9-10V6l-9-4Z"/></svg>
+        Verified Responder Access
+      </div>
+      <h1>Create Your Account</h1>
+      <p>Register to access the responder coordination portal</p>
+    </div>
+
+    <div class="progress" id="progress">
+      <div class="dot-wrap">
+        <div class="num" data-step="1">1</div>
+        <div class="label" data-step="1">Details</div>
+      </div>
+      <div class="line" data-line="1"></div>
+      <div class="dot-wrap">
+        <div class="num" data-step="2">2</div>
+        <div class="label" data-step="2">Password</div>
+      </div>
+      <div class="line" data-line="2"></div>
+      <div class="dot-wrap">
+        <div class="num" data-step="3">3</div>
+        <div class="label" data-step="3">Verify OTP</div>
+      </div>
+    </div>
+
+    <form id="signupForm" method="POST" action="">
+      <!-- {% csrf_token %} -->
+
+      <!-- STEP 1 -->
+      <div class="step active" id="step1">
+        <div class="grid">
+          <div class="field">
+            <label>First Name</label>
+            <input type="text" name="first_name" placeholder="Enter first name" required>
+          </div>
+          <div class="field">
+            <label>Last Name</label>
+            <input type="text" name="last_name" placeholder="Enter last name" required>
+          </div>
+
+          <div class="field">
+            <label>Father Name</label>
+            <input type="text" name="father_name" placeholder="Enter father name" required>
+          </div>
+          <div class="field">
+            <label>CNIC</label>
+            <input type="text" name="cnic" placeholder="00000-0000000-0" maxlength="15" required>
+          </div>
+
+          <div class="field">
+            <label>Mobile Number</label>
+            <input type="tel" name="mobile" id="mobile" placeholder="03XXXXXXXXX" required>
+          </div>
+          <div class="field">
+            <label>Country</label>
+            <select name="country" id="country" required>
+              <option value="Pakistan" selected>Pakistan</option>
+              <option value="Afghanistan">Afghanistan</option>
+              <option value="Bangladesh">Bangladesh</option>
+              <option value="China">China</option>
+              <option value="India">India</option>
+              <option value="Iran">Iran</option>
+              <option value="Nepal">Nepal</option>
+              <option value="Saudi Arabia">Saudi Arabia</option>
+              <option value="Sri Lanka">Sri Lanka</option>
+              <option value="Turkiye">Turkiye</option>
+              <option value="United Arab Emirates">United Arab Emirates</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="United States">United States</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="field" id="provinceWrap">
+            <label>Province / Region</label>
+            <select name="province" id="province" required>
+              <option value="" disabled selected>Select province</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Sindh">Sindh</option>
+              <option value="Khyber Pakhtunkhwa">Khyber Pakhtunkhwa</option>
+              <option value="Balochistan">Balochistan</option>
+              <option value="Gilgit-Baltistan">Gilgit-Baltistan</option>
+              <option value="Azad Jammu and Kashmir">Azad Jammu and Kashmir</option>
+              <option value="Islamabad Capital Territory">Islamabad Capital Territory</option>
+            </select>
+          </div>
+          <div class="field" id="districtWrap">
+            <label>District</label>
+            <select name="district" id="district" required disabled>
+              <option value="" selected>Select province first</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>City / Tehsil</label>
+            <input type="text" name="city" placeholder="Enter city or tehsil" required>
+          </div>
+          <div class="field">
+            <label>Postal Code <span class="opt">(optional)</span></label>
+            <input type="text" name="postal_code" placeholder="e.g. 57000">
+          </div>
+
+          <div class="field full">
+            <label>Street / Postal Address</label>
+            <textarea name="address" placeholder="House no, street, mohalla" required></textarea>
+          </div>
         </div>
-    </header>
 
-    <!-- Main Content Container -->
-    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-4xl overflow-hidden">
-            
-            <!-- Banner Header -->
-            <div class="bg-slate-900 text-white p-6 sm:p-8 border-b border-slate-800 relative">
-                <div class="relative z-10">
-                    <span class="inline-block bg-red-600/20 text-red-400 border border-red-500/30 text-xs px-3 py-1 rounded-full font-semibold mb-2">
-                        Official Personnel Registration
-                    </span>
-                    <h2 class="text-2xl sm:text-3xl font-bold">Create Responder Account</h2>
-                    <p class="text-slate-400 text-sm mt-1">Provide verified details for emergency deployment & field assignment authorization.</p>
-                </div>
-                <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-10 hidden sm:block text-slate-100 text-8xl">
-                    <i class="fa-solid fa-building-shield"></i>
-                </div>
-            </div>
-
-            <!-- Registration Form -->
-            <form method="post" action="{% url 'signup' %}" class="p-6 sm:p-8 space-y-8">
-                {% csrf_token %}
-
-                {% if form.errors %}
-                <div class="bg-red-50 border-l-4 border-red-600 p-4 rounded-r-xl text-sm text-red-800">
-                    <div class="flex items-center mb-1">
-                        <i class="fa-solid fa-circle-exclamation text-red-600 mr-2 text-base"></i>
-                        <span class="font-bold">Baraye Meherbani Form Ghalatiyan Theek Karein:</span>
-                    </div>
-                    <ul class="list-disc pl-6 space-y-1 text-xs sm:text-sm">
-                        {% for field, errors in form.errors.items %}
-                            <li><strong>{{ field|title }}:</strong> {{ errors|striptags }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-
-                <!-- SECTION 1: Personal Identification -->
-                <div>
-                    <div class="flex items-center space-x-2 border-b border-slate-200 pb-2 mb-4 text-slate-900">
-                        <i class="fa-solid fa-id-card text-red-600"></i>
-                        <h3 class="font-bold text-base uppercase tracking-wider">1. Personal Details</h3>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">First Name <span class="text-red-500">*</span></label>
-                            <input type="text" name="first_name" required placeholder="Muhammad" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Last Name <span class="text-red-500">*</span></label>
-                            <input type="text" name="last_name" required placeholder="Ali" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-
-                        <!-- Password Sequence (Right after names as requested) -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Account Password <span class="text-red-500">*</span></label>
-                            <input type="password" name="password" required placeholder="Minimum 8 characters" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Confirm Password <span class="text-red-500">*</span></label>
-                            <input type="password" name="confirm_password" required placeholder="Re-enter password" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Father Name <span class="text-red-500">*</span></label>
-                            <input type="text" name="father_name" required placeholder="Father Name" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">CNIC / NID Number <span class="text-red-500">*</span></label>
-                            <input type="text" name="cnic" required placeholder="36502-XXXXXXX-X" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION 2: Official Regional & Administrative Jurisdiction -->
-                <div>
-                    <div class="flex items-center space-x-2 border-b border-slate-200 pb-2 mb-4 text-slate-900">
-                        <i class="fa-solid fa-map-location-dot text-red-600"></i>
-                        <h3 class="font-bold text-base uppercase tracking-wider">2. Regional Jurisdiction & Location</h3>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Province / State <span class="text-red-500">*</span></label>
-                            <select name="province" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                                <option value="" disabled selected>Select Province</option>
-                                <option value="Punjab">Punjab</option>
-                                <option value="Sindh">Sindh</option>
-                                <option value="Khyber Pakhtunkhwa">Khyber Pakhtunkhwa</option>
-                                <option value="Balochistan">Balochistan</option>
-                                <option value="Islamabad Capital Territory">Islamabad (ICT)</option>
-                                <option value="Gilgit-Baltistan">Gilgit-Baltistan</option>
-                                <option value="Azad Jammu & Kashmir">Azad Jammu & Kashmir (AJK)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">District <span class="text-red-500">*</span></label>
-                            <input type="text" name="district" required placeholder="e.g. Sahiwal / Lahore" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">City / Tehsil <span class="text-red-500">*</span></label>
-                            <input type="text" name="city" required placeholder="e.g. Sahiwal Tehsil" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-
-                        <div class="sm:col-span-2 md:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Street Address <span class="text-red-500">*</span></label>
-                            <input type="text" name="address" required placeholder="House/Street/Area details..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Postal Code</label>
-                            <input type="text" name="postal_code" placeholder="57000" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION 3: Communication & Emergency Emergency Contact -->
-                <div>
-                    <div class="flex items-center space-x-2 border-b border-slate-200 pb-2 mb-4 text-slate-900">
-                        <i class="fa-solid fa-phone-volume text-red-600"></i>
-                        <h3 class="font-bold text-base uppercase tracking-wider">3. Communication & Emergency Contact</h3>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Primary Mobile Number <span class="text-red-500">*</span></label>
-                            <input type="text" name="mobile_number" required placeholder="03XXXXXXXXX" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Emergency Contact / Kin Mobile</label>
-                            <input type="text" name="emergency_contact" placeholder="03XXXXXXXXX" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm text-slate-900 transition">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit Button Area -->
-                <div class="pt-4 border-t border-slate-200">
-                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 px-6 rounded-xl transition duration-200 shadow-md flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-user-plus"></i>
-                        <span>Register Official Account</span>
-                    </button>
-                    <p class="text-xs text-slate-500 text-center mt-3">By registering, you confirm that all provided administrative and identification details are authentic.</p>
-                </div>
-            </form>
-
-            <div class="bg-slate-50 border-t border-slate-200 p-4 text-center">
-                <p class="text-sm text-slate-600">
-                    Pehle se official account registered hai? 
-                    <a href="{% url 'login' %}" class="text-red-600 font-bold hover:underline ml-1">Portal Login Karein</a>
-                </p>
-            </div>
+        <div class="actions">
+          <span></span>
+          <button type="button" class="btn btn-primary" id="toStep2">Next Step</button>
         </div>
-    </main>
+      </div>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 py-4 px-6 text-center text-xs border-t border-slate-800">
-        <p>© 2026 Disaster Response & Emergency Management Portal. All Rights Reserved.</p>
-    </footer>
+      <!-- STEP 2 -->
+      <div class="step" id="step2">
+        <div class="grid">
+          <div class="field full">
+            <label>Password <span class="opt">(minimum 8 characters)</span></label>
+            <div class="pw-wrap">
+              <input type="password" name="password" id="password" placeholder="Enter a strong password" required>
+              <button type="button" class="pw-toggle" data-target="password">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="strength"><div class="strength-fill" id="strengthFill"></div></div>
+            <span class="hint" id="pwHint">Use a mix of letters, numbers, and symbols</span>
+          </div>
 
+          <div class="field full">
+            <label>Confirm Password</label>
+            <div class="pw-wrap">
+              <input type="password" name="confirm_password" id="confirmPassword" placeholder="Repeat your password" required>
+              <button type="button" class="pw-toggle" data-target="confirmPassword">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <span class="hint err" id="matchHint">Passwords do not match</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" id="backStep1">Back</button>
+          <button type="button" class="btn btn-primary" id="toStep3">Send OTP</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step" id="step3">
+        <p class="otp-copy">
+          A 6-digit verification code has been sent to<br>
+          <strong id="otpMobileDisplay">your mobile number</strong>
+        </p>
+
+        <div class="otp-boxes">
+          <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="otp-digit">
+        </div>
+
+        <div class="otp-timer">
+          Code expires in <strong id="otpTimer">02:00</strong> &middot;
+          <button type="button" class="resend" id="resendOtp" disabled>Resend Code</button>
+        </div>
+        <div class="otp-status" id="otpStatus"></div>
+
+        <input type="hidden" name="otp_code" id="otpHidden">
+
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" id="backStep2">Back</button>
+          <button type="submit" class="btn btn-primary">Verify &amp; Create Account</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="trust-row">
+      <div class="trust-item"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Encrypted data</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Verified responders only</div>
+      <div class="trust-item"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>24/7 coordination</div>
+    </div>
+
+    <div class="footnote">
+      Already have an account? <a href="/login/">Sign in to the portal</a>
+    </div>
+  </div>
+
+<script>
+  const steps = { 1: document.getElementById('step1'), 2: document.getElementById('step2'), 3: document.getElementById('step3') };
+  const progress = document.getElementById('progress');
+
+  function goToStep(n){
+    Object.values(steps).forEach(s => s.classList.remove('active'));
+    steps[n].classList.add('active');
+
+    for (let i = 1; i <= 3; i++){
+      const num = progress.querySelector(`.num[data-step="${i}"]`);
+      const label = progress.querySelector(`.label[data-step="${i}"]`);
+      num.classList.remove('active','done'); label.classList.remove('active','done');
+      if (i < n){ num.classList.add('done'); label.classList.add('done'); num.textContent = '✓'; }
+      else if (i === n){ num.classList.add('active'); label.classList.add('active'); num.textContent = i; }
+      else { num.textContent = i; }
+    }
+    const line1 = progress.querySelector('.line[data-line="1"]');
+    const line2 = progress.querySelector('.line[data-line="2"]');
+    line1.classList.toggle('done', n > 1);
+    line2.classList.toggle('done', n > 2);
+  }
+
+  function validateRequired(container){
+    const required = container.querySelectorAll('input[required], select[required], textarea[required]');
+    let valid = true;
+    required.forEach(f => {
+      if (!f.value || !f.value.trim()) { f.classList.add('error'); valid = false; }
+      else { f.classList.remove('error'); }
+    });
+    return valid;
+  }
+
+  // --- Country -> switch province/district between PK dropdowns and generic text ---
+  const countrySelect = document.getElementById('country');
+  const provinceWrap = document.getElementById('provinceWrap');
+  const districtWrap = document.getElementById('districtWrap');
+
+  function setPakistanMode(){
+    provinceWrap.innerHTML = `
+      <label>Province / Region</label>
+      <select name="province" id="province" required>
+        <option value="" disabled selected>Select province</option>
+        <option value="Punjab">Punjab</option>
+        <option value="Sindh">Sindh</option>
+        <option value="Khyber Pakhtunkhwa">Khyber Pakhtunkhwa</option>
+        <option value="Balochistan">Balochistan</option>
+        <option value="Gilgit-Baltistan">Gilgit-Baltistan</option>
+        <option value="Azad Jammu and Kashmir">Azad Jammu and Kashmir</option>
+        <option value="Islamabad Capital Territory">Islamabad Capital Territory</option>
+      </select>`;
+    districtWrap.innerHTML = `
+      <label>District</label>
+      <select name="district" id="district" required disabled>
+        <option value="" selected>Select province first</option>
+      </select>`;
+    bindProvinceCascade();
+  }
+
+  function setGenericMode(){
+    provinceWrap.innerHTML = `
+      <label>State / Province</label>
+      <input type="text" name="province" id="province" placeholder="Enter state or province" required>`;
+    districtWrap.innerHTML = `
+      <label>District / Region</label>
+      <input type="text" name="district" id="district" placeholder="Enter district or region" required>`;
+  }
+
+  countrySelect.addEventListener('change', () => {
+    if (countrySelect.value === 'Pakistan') setPakistanMode();
+    else setGenericMode();
+  });
+
+  // --- Province -> District cascade (Pakistan mode only) ---
+  const districtsByProvince = {
+    "Punjab": ["Lahore","Faisalabad","Rawalpindi","Multan","Sahiwal","Gujranwala","Bahawalpur","Sialkot","Sargodha"],
+    "Sindh": ["Karachi","Hyderabad","Sukkur","Larkana","Nawabshah","Mirpurkhas"],
+    "Khyber Pakhtunkhwa": ["Peshawar","Mardan","Abbottabad","Swat","Kohat","Bannu"],
+    "Balochistan": ["Quetta","Gwadar","Turbat","Khuzdar","Sibi"],
+    "Gilgit-Baltistan": ["Gilgit","Skardu","Hunza","Ghanche"],
+    "Azad Jammu and Kashmir": ["Muzaffarabad","Mirpur","Rawalakot","Kotli"],
+    "Islamabad Capital Territory": ["Islamabad"]
+  };
+  function bindProvinceCascade(){
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    provinceSelect.addEventListener('change', () => {
+      const list = districtsByProvince[provinceSelect.value] || [];
+      districtSelect.innerHTML = '<option value="" disabled selected>Select district</option>' +
+        list.map(d => `<option value="${d}">${d}</option>`).join('');
+      districtSelect.disabled = list.length === 0;
+    });
+  }
+  bindProvinceCascade();
+
+  document.getElementById('toStep2').addEventListener('click', () => {
+    if (!validateRequired(steps[1])) return;
+    goToStep(2);
+  });
+  document.getElementById('backStep1').addEventListener('click', () => goToStep(1));
+
+  // --- Step 2 -> Step 3: trigger OTP ---
+  let otpTimerInterval;
+  document.getElementById('toStep3').addEventListener('click', () => {
+    if (!validateRequired(steps[2])) return;
+    if (pw.value.length < 8){ pw.classList.add('error'); return; }
+    if (pw.value !== confirmPw.value){ checkMatch(); return; }
+
+    const mobileVal = document.getElementById('mobile').value || 'your registered number';
+    document.getElementById('otpMobileDisplay').textContent = mobileVal;
+    goToStep(3);
+    document.querySelector('.otp-digit').focus();
+    startOtpTimer();
+  });
+  document.getElementById('backStep2').addEventListener('click', () => {
+    clearInterval(otpTimerInterval);
+    goToStep(2);
+  });
+
+  function startOtpTimer(){
+    clearInterval(otpTimerInterval);
+    let seconds = 120;
+    const timerEl = document.getElementById('otpTimer');
+    const resendBtn = document.getElementById('resendOtp');
+    resendBtn.disabled = true;
+    otpTimerInterval = setInterval(() => {
+      seconds--;
+      const m = String(Math.floor(seconds / 60)).padStart(2,'0');
+      const s = String(seconds % 60).padStart(2,'0');
+      timerEl.textContent = `${m}:${s}`;
+      if (seconds <= 0){
+        clearInterval(otpTimerInterval);
+        timerEl.textContent = '00:00';
+        resendBtn.disabled = false;
+      }
+    }, 1000);
+  }
+
+  document.getElementById('resendOtp').addEventListener('click', () => {
+    const status = document.getElementById('otpStatus');
+    status.textContent = 'A new code has been sent.';
+    status.className = 'otp-status ok';
+    startOtpTimer();
+  });
+
+  // --- OTP boxes: auto-advance, backspace, paste ---
+  const otpDigits = Array.from(document.querySelectorAll('.otp-digit'));
+  const otpHidden = document.getElementById('otpHidden');
+  otpDigits.forEach((box, idx) => {
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/[^0-9]/g, '');
+      if (box.value && idx < otpDigits.length - 1) otpDigits[idx+1].focus();
+      otpHidden.value = otpDigits.map(d => d.value).join('');
+    });
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && idx > 0) otpDigits[idx-1].focus();
+    });
+    box.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData.getData('text') || '').replace(/[^0-9]/g,'').slice(0,6);
+      text.split('').forEach((ch, i) => { if (otpDigits[i]) otpDigits[i].value = ch; });
+      otpHidden.value = otpDigits.map(d => d.value).join('');
+      const next = otpDigits[Math.min(text.length, otpDigits.length - 1)];
+      if (next) next.focus();
+    });
+  });
+
+  document.querySelectorAll('.pw-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      target.type = target.type === 'password' ? 'text' : 'password';
+    });
+  });
+
+  const pw = document.getElementById('password');
+  const fill = document.getElementById('strengthFill');
+  pw.addEventListener('input', () => {
+    let score = 0;
+    if (pw.value.length >= 8) score++;
+    if (/[A-Z]/.test(pw.value)) score++;
+    if (/[0-9]/.test(pw.value)) score++;
+    if (/[^A-Za-z0-9]/.test(pw.value)) score++;
+    const pct = (score / 4) * 100;
+    fill.style.width = pct + '%';
+    fill.style.background = score <= 1 ? '#c0392b' : score <= 2 ? '#d9932e' : '#3a9d6f';
+  });
+
+  const confirmPw = document.getElementById('confirmPassword');
+  const matchHint = document.getElementById('matchHint');
+  function checkMatch(){
+    if (confirmPw.value && confirmPw.value !== pw.value) {
+      matchHint.style.display = 'block';
+      confirmPw.classList.add('error');
+    } else {
+      matchHint.style.display = 'none';
+      confirmPw.classList.remove('error');
+    }
+  }
+  confirmPw.addEventListener('input', checkMatch);
+  pw.addEventListener('input', checkMatch);
+</script>
 </body>
 </html>
