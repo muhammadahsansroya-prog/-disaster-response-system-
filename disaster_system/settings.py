@@ -107,3 +107,8 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 # Security & HTTPS Configuration
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# WhiteNoise non-strict storage (prevents 500 error on missing files)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
