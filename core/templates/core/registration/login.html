@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Disaster Response System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-red-500">Disaster Response</h1>
+            <p class="text-slate-400 text-sm mt-1">Responder & Admin Portal Login</p>
+        </div>
+
+        {% if form.errors %}
+            <div class="bg-red-500/20 border border-red-500 text-red-300 p-3 rounded-lg text-sm mb-4 text-center">
+                Username ya Password ghalat hai. Baraye meherbani dobara koshish karein.
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Username</label>
+                <input type="text" name="username" required 
+                    class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:border-red-500 text-white">
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-sm font-medium text-slate-300">Password</label>
+                    <a href="{% url 'password_reset' %}" class="text-xs text-red-400 hover:underline">Forgot Password?</a>
+                </div>
+                <input type="password" name="password" required 
+                    class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:border-red-500 text-white">
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-red-600 hover:bg-red-700 font-semibold py-2.5 rounded-lg transition duration-200 mt-2 shadow-lg shadow-red-600/30">
+                Sign In
+            </button>
+        </form>
+
+        <div class="mt-6 text-center border-t border-slate-700 pt-4">
+            <p class="text-sm text-slate-400">
+                Naya account banana hai? 
+                <a href="{% url 'signup' %}" class="text-red-400 font-semibold hover:underline">Create Account / Register</a>
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>
