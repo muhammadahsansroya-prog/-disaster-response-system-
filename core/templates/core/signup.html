@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up - Disaster Response</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
+    <div class="bg-slate-800 p-8 rounded-xl shadow-lg w-96 border border-slate-700">
+        <h2 class="text-2xl font-bold mb-6 text-center text-red-500">Create Account</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="w-full mt-4 bg-red-600 hover:bg-red-700 py-2 rounded font-semibold transition">Register</button>
+        </form>
+        <p class="mt-4 text-sm text-center text-slate-400">
+            Pehle se account hai? <a href="/login/" class="text-red-400 hover:underline">Login karein</a>
+        </p>
+    </div>
+</body>
+</html>

@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = 'django-insecure-qr44t346x7ey1(bma^d=zcx)8)mgwqyuh23fnxib_o124jw5uw'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['ahsan32638.pythonanywhere.com', 'localhost', '127.0.0.1']
 
@@ -98,7 +98,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Authentication Redirects
 LOGIN_URL = '/login/'
@@ -107,8 +107,6 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 # Security & HTTPS Configuration
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# WhiteNoise non-strict storage (prevents 500 error on missing files)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
