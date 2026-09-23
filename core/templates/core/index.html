@@ -3,142 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disaster Response & Relief System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <title>Disaster Relief Coordination System - National Portal</title>
+    <!-- Tailwind CSS & FontAwesome Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .hero-section {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            padding: 70px 0;
-            border-bottom: 4px solid #dc3545;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .hero-disaster-bg {
+            background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.90), rgba(15, 23, 42, 0.95)), 
+                              url('https://images.unsplash.com/photo-1547683905-f686c993aae5?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
         }
-        .feature-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border: none;
-            border-radius: 10px;
+
+        .card-flood {
+            background-image: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.3)), 
+                              url('https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?q=80&w=800&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
         }
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.12) !important;
+
+        .card-rescue {
+            background-image: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.3)), 
+                              url('https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=800&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
         }
     </style>
 </head>
-<body class="bg-light d-flex flex-column min-vh-100">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-danger" href="{% url 'home' %}">
-                <i class="bi bi-shield-exclamation me-2"></i>Disaster Response
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center gap-2">
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="{% url 'submit_request' %}">Submit Emergency</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="{% url 'responder_dashboard' %}">Responder Panel</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="{% url 'dispatch_dashboard' %}">Dispatch Center</a>
-                    </li>
-                    {% if user.is_authenticated %}
-                        <li class="nav-item ms-2">
-                            <form action="{% url 'logout' %}" method="post" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-light btn-sm">Logout ({{ user.username }})</button>
-                            </form>
-                        </li>
-                    {% else %}
-                        <li class="nav-item ms-2">
-                            <a class="btn btn-danger btn-sm px-3 fw-bold" href="{% url 'login' %}">Portal Login</a>
-                        </li>
-                    {% endif %}
-                </ul>
+    <!-- Official Top Bar & Navigation -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-red-600/40 sticky top-0 z-50 py-3 px-4 sm:px-8 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-red-600 text-white p-2.5 rounded-xl font-bold flex items-center justify-center w-11 h-11 shadow-lg shadow-red-600/40 animate-pulse">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-wider text-white uppercase leading-tight">Disaster Response</h1>
+                    <p class="text-[11px] text-slate-400">Unified Emergency & Operations Command Center</p>
+                </div>
             </div>
-        </div>
-    </nav>
 
-    <header class="hero-section text-center">
-        <div class="container">
-            <h1 class="display-5 fw-bold mb-3">Disaster Relief Coordination System</h1>
-            <p class="lead text-light opacity-75 mx-auto" style="max-width: 650px;">
-                Unified real-time platform connecting affected citizens, dispatch centers, and field response teams.
-            </p>
-            <div class="mt-4">
-                <a href="{% url 'submit_request' %}" class="btn btn-danger btn-lg fw-bold px-4 shadow">
-                    <i class="bi bi-telephone-outbound me-2"></i>Report Emergency Now
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-300">
+                <a href="#emergency" class="hover:text-red-400 transition">Submit Emergency</a>
+                <a href="#panel" class="hover:text-red-400 transition">Responder Panel</a>
+                <a href="#dispatch" class="hover:text-red-400 transition">Dispatch Center</a>
+            </nav>
+
+            <div class="flex items-center space-x-3">
+                <a href="{% url 'signup' %}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-lg shadow-red-600/30 flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Register</span>
+                </a>
+                <a href="{% url 'login' %}" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition">
+                    Portal Login
                 </a>
             </div>
         </div>
     </header>
 
-    <main class="container my-5">
-        <div class="row g-4">
+    <!-- Ticker -->
+    <div class="bg-red-950/80 border-b border-red-800/50 py-2 px-4 text-xs font-medium text-red-200">
+        <div class="max-w-7xl mx-auto flex items-center space-x-3 overflow-hidden">
+            <span class="bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded tracking-widest uppercase shrink-0">LIVE ALERT</span>
+            <marquee class="whitespace-nowrap">
+                Real-Time Surveillance Active • National Disaster Relief Network Operational • Emergency Responders On Standby Across All Regional Sectors • Helpline: 1122
+            </marquee>
+        </div>
+    </div>
 
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm feature-card">
-                    <div class="card-body p-4 text-center">
-                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-3 mb-3">
-                            <i class="bi bi-geo-alt-fill fs-1"></i>
-                        </div>
-                        <h5 class="card-title fw-bold">Public Victim Portal</h5>
-                        <p class="card-text text-muted small">
-                            Direct reporting interface for citizens to request medical, food, or evacuation assistance with GPS coords.
-                        </p>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 pb-4 text-center">
-                        <a href="{% url 'submit_request' %}" class="btn btn-outline-danger w-100 fw-bold">Request Help</a>
-                    </div>
+    <!-- Hero Section with Real-Life Disaster Background -->
+    <section class="hero-disaster-bg py-20 px-4 sm:px-8 border-b border-slate-800 text-center relative">
+        <div class="max-w-4xl mx-auto space-y-6">
+            <span class="inline-block bg-red-600/20 text-red-400 border border-red-500/30 text-xs px-4 py-1.5 rounded-full font-bold uppercase tracking-widest">
+                National Emergency Network
+            </span>
+            <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight">
+                Disaster Relief Coordination System
+            </h1>
+            <p class="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto font-normal">
+                Unified real-time platform connecting affected citizens, field responders, and central dispatch centers for rapid emergency response.
+            </p>
+            
+            <div class="pt-4 flex flex-wrap justify-center gap-4">
+                <a href="#emergency" class="bg-red-600 hover:bg-red-700 text-white text-base font-extrabold px-8 py-4 rounded-xl shadow-xl shadow-red-600/40 transition flex items-center space-x-3">
+                    <i class="fa-solid fa-phone-volume text-lg animate-bounce"></i>
+                    <span>Report Emergency Now</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real Life Disaster Photo Features Grid -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 py-16 w-full">
+        <div class="text-center mb-12">
+            <h2 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-wider">Operations & Command Portals</h2>
+            <p class="text-slate-400 text-sm mt-1">Select your designated sector portal for active relief and coordination</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Card 1 -->
+            <div class="card-flood h-96 rounded-3xl p-6 border border-slate-800 shadow-2xl flex flex-col justify-between group hover:border-red-500/50 transition duration-300">
+                <div class="flex justify-between items-start">
+                    <span class="bg-red-600/90 text-white text-xs px-3 py-1 rounded-full font-bold uppercase">Public Portal</span>
+                    <i class="fa-solid fa-hand-holding-hand text-2xl text-slate-200"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-black text-white mb-2">Public Victim Portal</h3>
+                    <p class="text-xs text-slate-300 mb-6">Direct reporting interface for citizens to request medical assistance, flood evacuation, and food supplies.</p>
+                    <a href="#" class="block text-center bg-slate-900/90 hover:bg-red-600 text-white font-bold text-xs py-3 rounded-xl border border-slate-700 transition">Access Public Portal</a>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm feature-card">
-                    <div class="card-body p-4 text-center">
-                        <div class="bg-dark bg-opacity-10 text-dark rounded-circle d-inline-flex p-3 mb-3">
-                            <i class="bi bi-map-fill fs-1"></i>
-                        </div>
-                        <h5 class="card-title fw-bold">Responder Panel</h5>
-                        <p class="card-text text-muted small">
-                            Interactive Leaflet map display for active responders to locate field incidents and update action status.
-                        </p>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 pb-4 text-center">
-                        <a href="{% url 'responder_dashboard' %}" class="btn btn-outline-dark w-100 fw-bold">Open Map Panel</a>
-                    </div>
+            <!-- Card 2 -->
+            <div class="card-rescue h-96 rounded-3xl p-6 border border-slate-800 shadow-2xl flex flex-col justify-between group hover:border-red-500/50 transition duration-300">
+                <div class="flex justify-between items-start">
+                    <span class="bg-emerald-600/90 text-white text-xs px-3 py-1 rounded-full font-bold uppercase">Field Operations</span>
+                    <i class="fa-solid fa-truck-medical text-2xl text-slate-200"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-black text-white mb-2">Responder Panel</h3>
+                    <p class="text-xs text-slate-300 mb-6">Interactive live map for active rescue teams to accept SOS dispatches and report ground status.</p>
+                    <a href="{% url 'signup' %}" class="block text-center bg-slate-900/90 hover:bg-emerald-600 text-white font-bold text-xs py-3 rounded-xl border border-slate-700 transition">Register As Responder</a>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm feature-card">
-                    <div class="card-body p-4 text-center">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
-                            <i class="bi bi-headset fs-1"></i>
-                        </div>
-                        <h5 class="card-title fw-bold">Dispatch Center</h5>
-                        <p class="card-text text-muted small">
-                            Central coordination panel to monitor all ongoing alerts, system resources, and dispatch activity logs.
-                        </p>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 pb-4 text-center">
-                        <a href="{% url 'dispatch_dashboard' %}" class="btn btn-outline-primary w-100 fw-bold">Access Dispatch</a>
-                    </div>
+            <!-- Card 3 -->
+            <div class="bg-slate-900 border border-slate-800 h-96 rounded-3xl p-6 shadow-2xl flex flex-col justify-between group hover:border-red-500/50 transition duration-300">
+                <div class="flex justify-between items-start">
+                    <span class="bg-blue-600/90 text-white text-xs px-3 py-1 rounded-full font-bold uppercase">HQ Operations</span>
+                    <i class="fa-solid fa-tower-observation text-2xl text-slate-200"></i>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-black text-white mb-2">Dispatch Center</h3>
+                    <p class="text-xs text-slate-400 mb-6">Centralized control panel for administrators to monitor active emergencies and assign rescue units.</p>
+                    <a href="{% url 'login' %}" class="block text-center bg-slate-800 hover:bg-blue-600 text-white font-bold text-xs py-3 rounded-xl border border-slate-700 transition">Dispatch HQ Login</a>
                 </div>
             </div>
 
         </div>
-    </main>
+    </section>
 
-    <footer class="bg-dark text-light py-3 text-center mt-auto border-top border-secondary">
-        <div class="container">
-            <small>&copy; Disaster Response System. All rights reserved.</small>
-        </div>
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-6 px-4 text-center text-xs text-slate-500">
+        <p>© 2026 Disaster Response & Emergency Management Portal. All Rights Reserved.</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
