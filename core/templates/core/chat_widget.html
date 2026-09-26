@@ -1,0 +1,109 @@
+<style>
+  #chatToggleBtn{
+    position:fixed; bottom:24px; right:24px; z-index:9999;
+    width:58px; height:58px; border-radius:50%;
+    background:linear-gradient(135deg,#d64535,#c0392b);
+    border:none; cursor:pointer; box-shadow:0 8px 20px rgba(214,69,53,0.4);
+    display:flex; align-items:center; justify-content:center;
+  }
+  #chatToggleBtn svg{ width:26px; height:26px; stroke:#fff; fill:none; stroke-width:2; }
+
+  #chatWindow{
+    position:fixed; bottom:92px; right:24px; z-index:9999;
+    width:340px; max-width:90vw; height:440px;
+    background:#0f1826; border:1px solid rgba(255,255,255,0.1);
+    border-radius:14px; box-shadow:0 20px 50px rgba(0,0,0,0.5);
+    display:none; flex-direction:column; overflow:hidden;
+    font-family:Arial,sans-serif;
+  }
+  #chatWindow.open{ display:flex; }
+
+  #chatHeader{
+    background:#152238; padding:14px 16px; color:#eef1f6;
+    font-size:14px; font-weight:600; display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  #chatHeader span.sub{ display:block; font-size:11px; font-weight:400; color:#7c8ba1; margin-top:2px; }
+  #chatCloseBtn{ background:none; border:none; color:#7c8ba1; cursor:pointer; font-size:18px; }
+
+  #chatMessages{
+    flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px;
+  }
+  .msg{ max-width:80%; padding:9px 12px; border-radius:10px; font-size:13px; line-height:1.5; }
+  .msg.bot{ background:#1c2d48; color:#eef1f6; align-self:flex-start; border-bottom-left-radius:2px; }
+  .msg.user{ background:#d64535; color:#fff; align-self:flex-end; border-bottom-right-radius:2px; }
+
+  #chatInputRow{
+    display:flex; gap:8px; padding:12px; border-top:1px solid rgba(255,255,255,0.08);
+  }
+  #chatInput{
+    flex:1; background:#0a0f1a; border:1px solid rgba(255,255,255,0.12); color:#eef1f6;
+    border-radius:8px; padding:9px 11px; font-size:13px; outline:none;
+  }
+  #chatSendBtn{
+    background:#d64535; border:none; color:#fff; border-radius:8px; padding:0 14px;
+    cursor:pointer; font-size:13px; font-weight:600;
+  }
+</style>
+
+<button id="chatToggleBtn" aria-label="Open chat assistant">
+  <svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 8.8 8.8 0 0 1-4-1L3 20l1.1-4.5a8.4 8.4 0 0 1-1-3.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/></svg>
+</button>
+
+<div id="chatWindow">
+  <div id="chatHeader">
+    <div>
+      Relief Assistant
+      <span class="sub">Ask about requests, status, or resources</span>
+    </div>
+    <button id="chatCloseBtn">&times;</button>
+  </div>
+  <div id="chatMessages">
+    <div class="msg bot">Hello. I can help you with submitting a request, tracking status, urgency levels, or resource types. What do you need?</div>
+  </div>
+  <div id="chatInputRow">
+    <input type="text" id="chatInput" placeholder="Type your question...">
+    <button id="chatSendBtn">Send</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const toggleBtn = document.getElementById('chatToggleBtn');
+  const closeBtn = document.getElementById('chatCloseBtn');
+  const windowEl = document.getElementById('chatWindow');
+  const messagesEl = document.getElementById('chatMessages');
+  const inputEl = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('chatSendBtn');
+
+  toggleBtn.addEventListener('click', () => windowEl.classList.toggle('open'));
+  closeBtn.addEventListener('click', () => windowEl.classList.remove('open'));
+
+  function addMessage(text, sender){
+    const div = document.createElement('div');
+    div.className = 'msg ' + sender;
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function sendMessage(){
+    const text = inputEl.value.trim();
+    if (!text) return;
+    addMessage(text, 'user');
+    inputEl.value = '';
+
+    fetch("{% url 'chatbot_reply' %}", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'message=' + encodeURIComponent(text)
+    })
+    .then(res => res.json())
+    .then(data => addMessage(data.response || 'Sorry, something went wrong.', 'bot'))
+    .catch(() => addMessage('Connection error. Please try again.', 'bot'));
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+})();
+</script>

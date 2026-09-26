@@ -1,7 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import HelpRequest, Resource, DispatchLog
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import HelpRequest, Resource, DispatchLog, ChatLog
+from .chatbot import get_bot_response, get_session_id
 
 
 def home(request):
@@ -25,11 +31,23 @@ def submit_request(request):
             urgency=urgency,
             status='pending'
         )
-        
+
         messages.success(request, "Emergency alert submitted successfully! Dispatch team has been notified.")
         return redirect('submit_request')
 
     return render(request, 'core/submit_request.html')
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('responder_dashboard')
+    else:
+        form = UserCreationForm()
+    return render(request, 'core/signup.html', {'form': form})
 
 
 @login_required
@@ -48,12 +66,12 @@ def update_request_status(request, request_id):
         help_request = get_object_or_404(HelpRequest, id=request_id)
         new_status = request.POST.get('status')
         valid_statuses = [choice[0] for choice in HelpRequest.STATUS_CHOICES]
-        
+
         if new_status in valid_statuses:
             help_request.status = new_status
             help_request.save()
             messages.success(request, f"Status updated to '{new_status.title()}' successfully.")
-            
+
     return redirect('responder_dashboard')
 
 
@@ -62,43 +80,45 @@ def dispatch_dashboard(request):
     if request.method == 'POST':
         request_id = request.POST.get('request_id')
         resource_id = request.POST.get('resource_id')
-        
+
         help_req = get_object_or_404(HelpRequest, id=request_id)
         resource = get_object_or_404(Resource, id=resource_id)
-        
-        # Dispatch record store karna
+
         DispatchLog.objects.create(help_request=help_req, resource=resource)
-        
-        # Status automatically dispatch update karna
+
         help_req.status = 'dispatched'
         help_req.save()
-        
+
         resource.status = 'dispatched'
         resource.save()
-        
+
         messages.success(request, f"Resource '{resource.resource_type}' assigned to {help_req.need_type} request successfully!")
         return redirect('dispatch_dashboard')
 
     requests = HelpRequest.objects.all().order_by('-created_at')
     resources = Resource.objects.all()
     dispatch_logs = DispatchLog.objects.all().order_by('-dispatched_at')
-    
+
     return render(request, 'core/dispatch_dashboard.html', {
         'requests': requests,
         'resources': resources,
         'dispatch_logs': dispatch_logs
     })
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
 
-def signup(request):
+
+@csrf_exempt
+def chatbot_reply(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('responder_dashboard')
-    else:
-        form = UserCreationForm()
-    return render(request, 'core/signup.html', {'form': form})
+        user_message = request.POST.get('message', '')
+        session_id = get_session_id(request)
+        bot_response = get_bot_response(user_message)
+
+        ChatLog.objects.create(
+            session_id=session_id,
+            user_message=user_message,
+            bot_response=bot_response
+        )
+        return JsonResponse({'response': bot_response})
+
+    return JsonResponse({'error': 'POST required'}, status=400)
+

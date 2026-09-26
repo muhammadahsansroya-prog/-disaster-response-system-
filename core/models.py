@@ -99,3 +99,12 @@ class DispatchLog(models.Model):
 
     def __str__(self):
         return f"PM Relief Dispatch #{self.id}: {self.resource.get_resource_type_display()} -> {self.help_request.victim_name}"
+
+class ChatLog(models.Model):
+    session_id = models.CharField(max_length=100)
+    user_message = models.TextField()
+    bot_response = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.session_id}: {self.user_message[:40]}"
