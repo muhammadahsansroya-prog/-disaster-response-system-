@@ -13,12 +13,17 @@ def home(request):
 
 def login_view(request):
     """Custom Login View with Admin / Responder Role-Based Redirect"""
+    if request.user.is_authenticated:
+        if request.user.is_superuser or request.user.is_staff:
+            return redirect('dispatch_dashboard')
+        return redirect('responder_dashboard')
+
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            # Admin ya Staff ko Dispatch Dashboard aur normal user ko Responder Dashboard bhejein
+            # Check Admin vs Responder Role
             if user.is_superuser or user.is_staff:
                 return redirect('dispatch_dashboard')
             return redirect('responder_dashboard')
@@ -96,7 +101,7 @@ def update_request_status(request, request_id):
 
 @login_required
 def dispatch_dashboard(request):
-    # Non-admin users ko dispatch dashboard access na mile
+    # Non-admin / non-staff users ko responder dashboard bhej do
     if not (request.user.is_superuser or request.user.is_staff):
         return redirect('responder_dashboard')
 
@@ -107,10 +112,8 @@ def dispatch_dashboard(request):
         help_req = get_object_or_404(HelpRequest, id=request_id)
         resource = get_object_or_404(Resource, id=resource_id)
         
-        # Dispatch record store karna
         DispatchLog.objects.create(help_request=help_req, resource=resource)
         
-        # Status automatically dispatch update karna
         help_req.status = 'dispatched'
         help_req.save()
         
