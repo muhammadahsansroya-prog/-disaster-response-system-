@@ -1,0 +1,30 @@
+[33m193fefb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Updated brand name to DRAS with animated CSS logo
+[33m4bed536[m Completely redesigned UI to APEX REFUGE theme with custom CSS
+[33mf946c20[m Upgraded index.html with tactical disaster UI and real field imagery
+[33m387405a[m Updated index.html with clean neutral branding
+[33m137ded8[m Add AI chatbot with Hugging Face
+[33m8f2eece[m Replace index.html with Esri Topo Map Tiles
+[33mfe5e029[m Updated complete index.html with CartoDB dark tiles
+[33m6d8705f[m Deploy 100% Dynamic Disaster Response & Resource Allocation System UI with Live Map and Interactive SOS Engine
+[33m9f483fb[m Transform Home Page UI with live disaster imagery and official command center styling
+[33mcde780e[m Add high-impact disaster imagery and emergency dashboard UI for signup page
+[33m06efd4e[m Update signup page design
+[33m4eb43f3[m Upgrade signup page to official government disaster management UI
+[33mf783890[m Upgrade signup page to official government disaster management UI
+[33m25b7675[m Add new styled signup form layout
+[33m294912a[m Fix registration/login.html template missing error
+[33m045f745[m Add styled login page with signup and forgot password links
+[33m91757d9[m Fix login routing and add signup feature
+[33m1c1de48[m Fix auto field warning and static storage
+[33m086d786[m Fix login url redirect
+[33m7ec5437[m Deployment setup
+[33md661c08[m Add project documentation
+[33mc958ed4[m Integrate interactive CartoDB Leaflet map in responder dashboard
+[33m7432bee[m Add Central Dispatch Command Center and logging functionality
+[33m7f2c8e1[m Add request status update feature to responder dashboard
+[33mfa2f646[m Update responder dashboard with Bootstrap table styling
+[33m7ce19a1[m Enhance victim request portal UI and views
+[33md789d6d[m Fix login redirect to responder dashboard
+[33me97389a[m Add responder login and dashboard
+[33mb46861d[m Remove database and cache files from tracking
+[33mae79145[m Initial version of disaster response system
