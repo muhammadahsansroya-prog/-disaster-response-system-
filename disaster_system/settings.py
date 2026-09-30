@@ -3,6 +3,10 @@ Django settings for disaster_system project.
 """
 
 from pathlib import Path
+import pymysql
+
+# PyMySQL ko MySQLdb ki tarah register karein (XAMPP compatibility ke liye)
+pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -59,11 +63,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'disaster_system.wsgi.application'
 
 
-# Database
+# XAMPP MySQL Database Configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'disaster_db',       # XAMPP phpMyAdmin mein jo Database banaya hai
+        'USER': 'root',              # XAMPP MySQL default user
+        'PASSWORD': '',              # XAMPP MySQL default password khali hota hai
+        'HOST': '127.0.0.1',         # Localhost IP
+        'PORT': '3306',              # Default MySQL Port
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
@@ -110,3 +121,4 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+SILENCED_SYSTEM_CHECKS = ['models.E015']

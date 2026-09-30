@@ -1,27 +1,16 @@
 from django.contrib import admin
 from .models import HelpRequest, Resource, DispatchLog
-from .matching import find_nearest_resource
 
-@admin.action(description="Dispatch nearest available resource")
-def dispatch_nearest(modeladmin, request, queryset):
-    for help_request in queryset:
-        resource, distance = find_nearest_resource(help_request)
-        if resource:
-            DispatchLog.objects.create(help_request=help_request, resource=resource)
-            resource.status = 'dispatched'
-            resource.save()
-            help_request.status = 'dispatched'
-            help_request.save()
-            modeladmin.message_user(request, f"{resource} dispatched ({distance:.1f} km away) for request #{help_request.id}")
-        else:
-            modeladmin.message_user(request, f"No available resource found for request #{help_request.id}", level='warning')
-
-
+@admin.register(HelpRequest)
 class HelpRequestAdmin(admin.ModelAdmin):
-    list_display = ('id', 'need_type', 'location', 'urgency', 'status', 'created_at')
-    actions = [dispatch_nearest]
+    list_display = ('id', 'victim_name', 'location', 'urgency', 'status', 'created_at')
+    list_filter = ('urgency', 'status')
+    search_fields = ('victim_name', 'location')
 
+@admin.register(Resource)
+class ResourceAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'created_at')
 
-admin.site.register(HelpRequest, HelpRequestAdmin)
-admin.site.register(Resource)
-admin.site.register(DispatchLog)
+@admin.register(DispatchLog)
+class DispatchLogAdmin(admin.ModelAdmin):
+    list_display = ('id', 'resource', 'dispatched_at')
