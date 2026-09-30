@@ -1,12 +1,49 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login, logout
 from .models import HelpRequest, Resource, DispatchLog
 
 
 def home(request):
     """Central Home Landing Page View"""
     return render(request, 'core/index.html')
+
+
+def login_view(request):
+    """Custom Login View with Admin / Responder Role-Based Redirect"""
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            # Admin ya Staff ko Dispatch Dashboard aur normal user ko Responder Dashboard bhejein
+            if user.is_superuser or user.is_staff:
+                return redirect('dispatch_dashboard')
+            return redirect('responder_dashboard')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'core/login.html', {'form': form})
+
+
+def logout_view(request):
+    """Logout View"""
+    logout(request)
+    return redirect('login')
+
+
+def signup(request):
+    """User Registration View"""
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('responder_dashboard')
+    else:
+        form = UserCreationForm()
+    return render(request, 'core/signup.html', {'form': form})
 
 
 def submit_request(request):
@@ -59,6 +96,10 @@ def update_request_status(request, request_id):
 
 @login_required
 def dispatch_dashboard(request):
+    # Non-admin users ko dispatch dashboard access na mile
+    if not (request.user.is_superuser or request.user.is_staff):
+        return redirect('responder_dashboard')
+
     if request.method == 'POST':
         request_id = request.POST.get('request_id')
         resource_id = request.POST.get('resource_id')
@@ -88,17 +129,3 @@ def dispatch_dashboard(request):
         'resources': resources,
         'dispatch_logs': dispatch_logs
     })
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
-
-def signup(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('responder_dashboard')
-    else:
-        form = UserCreationForm()
-    return render(request, 'core/signup.html', {'form': form})
