@@ -1,13 +1,13 @@
+from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.urls import path
-from . import views
+from core import views
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('', views.home, name='home'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
-    path('signup/', views.signup, name='signup'),
-    path('responder/', views.responder_dashboard, name='responder_dashboard'),
-    path('dispatch/', views.dispatch_dashboard, name='dispatch_dashboard'),
     path('submit/', views.submit_request, name='submit_request'),
-    path('update_status/<int:request_id>/', views.update_request_status, name='update_request_status'),
+    # Explicit template_name pass kar diya hai taake TemplateDoesNotExist error na aaye
+    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]

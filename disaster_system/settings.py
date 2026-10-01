@@ -64,17 +64,23 @@ WSGI_APPLICATION = 'disaster_system.wsgi.application'
 
 
 # XAMPP MySQL Database Configuration
+#DATABASES = {
+#    'default': {
+        #'ENGINE': 'django.db.backends.mysql',
+        #'NAME': 'disaster_db',       # XAMPP phpMyAdmin mein jo Database banaya hai
+        #'USER': 'root',              # XAMPP MySQL default user
+        #'PASSWORD': '',              # XAMPP MySQL default password khali hota hai
+        #'HOST': '127.0.0.1',         # Localhost IP
+        #'PORT': '3306',              # Default MySQL Port
+        #'OPTIONS': {
+         #   'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        #},
+    #}
+#}
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'disaster_db',       # XAMPP phpMyAdmin mein jo Database banaya hai
-        'USER': 'root',              # XAMPP MySQL default user
-        'PASSWORD': '',              # XAMPP MySQL default password khali hota hai
-        'HOST': '127.0.0.1',         # Localhost IP
-        'PORT': '3306',              # Default MySQL Port
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

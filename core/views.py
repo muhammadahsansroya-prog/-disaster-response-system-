@@ -1,134 +1,149 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import login, logout
-from .models import HelpRequest, Resource, DispatchLog
+from .models import HelpRequest, Resource, DispatchLog, Department
 
 
 def home(request):
-    """Central Home Landing Page View"""
-    return render(request, 'core/index.html')
+    """Home Landing Page"""
+    return render(request, 'core/home.html')
 
 
 def login_view(request):
-    """Custom Login View with Admin / Responder Role-Based Redirect"""
-    if request.user.is_authenticated:
-        if request.user.is_superuser or request.user.is_staff:
-            return redirect('dispatch_dashboard')
-        return redirect('responder_dashboard')
-
+    """Login View for System Users"""
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            # Check Admin vs Responder Role
-            if user.is_superuser or user.is_staff:
-                return redirect('dispatch_dashboard')
-            return redirect('responder_dashboard')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'core/login.html', {'form': form})
-
-
-def logout_view(request):
-    """Logout View"""
-    logout(request)
-    return redirect('login')
-
-
-def signup(request):
-    """User Registration View"""
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('responder_dashboard')
-    else:
-        form = UserCreationForm()
-    return render(request, 'core/signup.html', {'form': form})
+        return redirect('dispatch_dashboard')
+    return render(request, 'core/login.html')
 
 
 def submit_request(request):
+    """Victim Public Request Submission Portal with GPS & Detailed Fields"""
     if request.method == 'POST':
-        need_type = request.POST.get('disaster_type') or request.POST.get('need_type')
-        location = request.POST.get('location')
-        latitude = request.POST.get('latitude') or 33.6844
-        longitude = request.POST.get('longitude') or 73.0479
+        victim_name = request.POST.get('victim_name') or 'Anonymous'
+        victim_phone = request.POST.get('victim_phone', '')
+        need_type = request.POST.get('need_type') or 'General Rescue'
         urgency = request.POST.get('urgency') or 'medium'
+        description = request.POST.get('description', '')
+        location = request.POST.get('location') or 'Location Not Provided'
+        
+        try:
+            latitude = float(request.POST.get('latitude', 30.6514))
+            longitude = float(request.POST.get('longitude', 73.1306))
+        except ValueError:
+            latitude, longitude = 30.6514, 73.1306
 
-        HelpRequest.objects.create(
+        req = HelpRequest.objects.create(
+            victim_name=victim_name,
+            victim_phone=victim_phone,
+            need_type=need_type,
+            urgency=urgency,
+            description=description,
             location=location,
             latitude=latitude,
             longitude=longitude,
-            need_type=need_type,
-            urgency=urgency,
-            status='pending'
+            status='PENDING'
         )
-        
-        messages.success(request, "Emergency alert submitted successfully! Dispatch team has been notified.")
+
+        DispatchLog.objects.create(
+            help_request=req,
+            action_by='Victim (Public User)',
+            status_update='PENDING',
+            notes=f"Emergency Alert Created by {victim_name} ({victim_phone}). Location: {location}"
+        )
+
+        messages.success(request, f"Emergency Alert #{req.id} submitted! Central Dispatch team has been alerted.")
         return redirect('submit_request')
 
     return render(request, 'core/submit_request.html')
 
 
-@login_required
-def responder_dashboard(request):
-    my_resources = Resource.objects.filter(responder=request.user)
-    requests = HelpRequest.objects.all().order_by('-created_at')
-    return render(request, 'core/responder_dashboard.html', {
-        'resources': my_resources,
-        'requests': requests
-    })
-
-
-@login_required
-def update_request_status(request, request_id):
-    if request.method == 'POST':
-        help_request = get_object_or_404(HelpRequest, id=request_id)
-        new_status = request.POST.get('status')
-        valid_statuses = [choice[0] for choice in HelpRequest.STATUS_CHOICES]
-        
-        if new_status in valid_statuses:
-            help_request.status = new_status
-            help_request.save()
-            messages.success(request, f"Status updated to '{new_status.title()}' successfully.")
-            
-    return redirect('responder_dashboard')
-
-
-@login_required
 def dispatch_dashboard(request):
-    # Non-admin / non-staff users ko responder dashboard bhej do
-    if not (request.user.is_superuser or request.user.is_staff):
-        return redirect('responder_dashboard')
-
+    """System Administrator Central Command Center"""
     if request.method == 'POST':
         request_id = request.POST.get('request_id')
-        resource_id = request.POST.get('resource_id')
-        
-        help_req = get_object_or_404(HelpRequest, id=request_id)
-        resource = get_object_or_404(Resource, id=resource_id)
-        
-        DispatchLog.objects.create(help_request=help_req, resource=resource)
-        
-        help_req.status = 'dispatched'
-        help_req.save()
-        
-        resource.status = 'dispatched'
-        resource.save()
-        
-        messages.success(request, f"Resource '{resource.resource_type}' assigned to {help_req.need_type} request successfully!")
+        action = request.POST.get('action')
+
+        if request_id:
+            help_req = get_object_or_404(HelpRequest, id=request_id)
+
+            if action == 'assign_dept':
+                dept_id = request.POST.get('department_id')
+                responder_unit = request.POST.get('assigned_responder', 'Field Unit')
+                instructions = request.POST.get('admin_instructions', '')
+
+                dept = Department.objects.filter(id=dept_id).first() if dept_id else None
+
+                help_req.status = 'ASSIGNED_TO_DEPT'
+                help_req.assigned_department = dept
+                help_req.assigned_responder = responder_unit
+                help_req.admin_instructions = instructions
+                help_req.save()
+
+                DispatchLog.objects.create(
+                    help_request=help_req,
+                    action_by='System Administrator',
+                    status_update='ASSIGNED_TO_DEPT',
+                    notes=f"Assigned to {dept.name if dept else 'Department'} ({responder_unit}). Notes: {instructions}"
+                )
+                messages.success(request, f"Request #{help_req.id} forwarded to {responder_unit}.")
+
+            elif action == 'resolve':
+                help_req.status = 'RESOLVED'
+                help_req.save()
+
+                DispatchLog.objects.create(
+                    help_request=help_req,
+                    action_by='System Administrator',
+                    status_update='RESOLVED',
+                    notes="Request closed & marked as resolved by Admin."
+                )
+                messages.success(request, f"Request #{help_req.id} closed successfully.")
+
         return redirect('dispatch_dashboard')
 
-    requests = HelpRequest.objects.all().order_by('-created_at')
+    help_requests = HelpRequest.objects.all().order_by('-created_at')
+    departments = Department.objects.all()
+    logs = DispatchLog.objects.all().order_by('-dispatched_at')[:25]
+
+    context = {
+        'help_requests': help_requests,
+        'departments': departments,
+        'logs': logs,
+    }
+    return render(request, 'core/dispatch_dashboard.html', context)
+
+
+def responder_dashboard(request):
+    """Field Responder & Resource Deployment Hub"""
+    if request.method == 'POST':
+        request_id = request.POST.get('request_id')
+        allocated_resource = request.POST.get('allocated_resource', 'Field Unit')
+        new_status = request.POST.get('status', 'IN_PROGRESS')
+        progress_notes = request.POST.get('progress_notes', '')
+
+        if request_id:
+            help_req = get_object_or_404(HelpRequest, id=request_id)
+            help_req.status = new_status
+            help_req.allocated_resource = allocated_resource
+            if progress_notes:
+                help_req.progress_notes = progress_notes
+            help_req.save()
+
+            DispatchLog.objects.create(
+                help_request=help_req,
+                resource_name=allocated_resource,
+                action_by='Field Responder Team',
+                status_update=new_status,
+                notes=f"Resource Allocated: {allocated_resource}. Status: {new_status}. Notes: {progress_notes}"
+            )
+            messages.success(request, f"Request #{help_req.id} updated to {new_status} with {allocated_resource}.")
+
+        return redirect('responder_dashboard')
+
+    assigned_requests = HelpRequest.objects.exclude(status='RESOLVED').order_by('-created_at')
     resources = Resource.objects.all()
-    dispatch_logs = DispatchLog.objects.all().order_by('-dispatched_at')
-    
-    return render(request, 'core/dispatch_dashboard.html', {
-        'requests': requests,
+
+    context = {
+        'assigned_requests': assigned_requests,
         'resources': resources,
-        'dispatch_logs': dispatch_logs
-    })
+    }
+    return render(request, 'core/responder_dashboard.html', context)
