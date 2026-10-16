@@ -10,16 +10,21 @@
         .badge-pending { background-color: #ffc107; color: #000; }
         .badge-assigned { background-color: #0d6efd; color: #fff; }
         .badge-progress { background-color: #fd7e14; color: #fff; }
-        .badge-resolved { background-color: #198754; color: #fff; }
+        .badge-resolved { background-color: #198747; color: #fff; }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-dark bg-dark px-4 shadow-sm">
         <a class="navbar-brand fw-bold text-danger" href="#">⚡ Central Dispatch Command Center (Admin)</a>
-        <div>
-            <a href="{% url 'submit_request' %}" class="btn btn-outline-light btn-sm me-2">+ New Public Request</a>
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-light small me-2">Logged in as: <strong>{{ request.user.username }}</strong></span>
+            <a href="{% url 'submit_request' %}" class="btn btn-outline-light btn-sm">+ New Public Request</a>
             <a href="{% url 'responder_dashboard' %}" class="btn btn-warning btn-sm">Responder Dashboard</a>
+            <form method="POST" action="{% url 'logout' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+            </form>
         </div>
     </nav>
 

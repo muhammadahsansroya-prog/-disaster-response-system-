@@ -1,0 +1,673 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DYNAMIC DISASTER RESPONSE AND RESOURCE ALLOCATION SYSTEM</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            color: #172033;
+            font-family: 'Inter', sans-serif;
+        }
+        .system-font {
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .main-navbar {
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 3px 20px rgba(15,23,42,0.06);
+        }
+        .logo-box {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: #b91c1c;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(185,28,28,0.20);
+        }
+        
+        /* =========================
+           HERO SLIDESHOW BACKGROUND
+        ========================= */
+        .hero-section {
+            position: relative;
+            min-height: 620px;
+            background: #111827;
+            overflow: hidden;
+        }
+        .hero-slides-wrapper {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #111827;
+        }
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            transform: scale(1.05);
+            animation: kenburns 8s ease-out infinite alternate;
+        }
+        .hero-slide.active {
+            opacity: 1;
+        }
+        @keyframes kenburns {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.5) 45%, rgba(0,0,0,0.2) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 5;
+            min-height: 620px;
+            display: flex;
+            align-items: center;
+        }
+        .hero-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(185,28,28,0.92);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+        }
+        .hero-title {
+            max-width: 900px;
+            color: white;
+            font-size: clamp(34px, 5vw, 70px);
+            line-height: 1.02;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin: 0;
+            text-shadow: 0 4px 25px rgba(0,0,0,0.45);
+        }
+        .hero-description {
+            max-width: 700px;
+            margin-top: 22px;
+            color: rgba(255,255,255,0.90);
+            font-size: 17px;
+            line-height: 1.7;
+        }
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        .hero-primary {
+            background: #dc2626;
+            color: white;
+            padding: 13px 20px;
+            border-radius: 9px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: 0.25s;
+        }
+        .hero-primary:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+        .hero-secondary {
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.35);
+            color: white;
+            padding: 13px 20px;
+            border-radius: 9px;
+            font-weight: 700;
+            text-decoration: none;
+            backdrop-filter: blur(8px);
+            transition: 0.25s;
+        }
+        .hero-secondary:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .status-card {
+            position: absolute;
+            right: 6%;
+            bottom: 45px;
+            z-index: 6;
+            width: 310px;
+            background: rgba(255,255,255,0.96);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        }
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .live-dot {
+            width: 9px;
+            height: 9px;
+            background: #16a34a;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            box-shadow: 0 0 0 5px rgba(22,163,74,0.12);
+        }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-top: 1px solid #eef0f3;
+            font-size: 13px;
+        }
+        .section {
+            padding: 75px 0;
+        }
+        .section-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        .section-subtitle {
+            color: #64748b;
+            font-size: 15px;
+        }
+        .white-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(15,23,42,0.06);
+        }
+        #map {
+            width: 100%;
+            height: 520px;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .sos-card {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #fecaca;
+            box-shadow: 0 12px 35px rgba(127,29,29,0.07);
+        }
+        .sos-header {
+            background: linear-gradient(135deg,#991b1b,#dc2626);
+            color: white;
+            padding: 22px;
+            border-radius: 18px 18px 0 0;
+        }
+        .input-field {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            padding: 12px 14px;
+            background: #f9fafb;
+            color: #111827;
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+        }
+        .resource-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 17px;
+            transition: 0.25s;
+        }
+        .resource-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+        }
+        .resource-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ecfdf5;
+            color: #059669;
+        }
+        footer {
+            background: #111827;
+            color: #94a3b8;
+        }
+        @media (max-width: 900px) {
+            .status-card {
+                display: none;
+            }
+            .hero-section, .hero-content {
+                min-height: 600px;
+            }
+            .hero-title {
+                font-size: 42px;
+            }
+            .hero-description {
+                font-size: 15px;
+            }
+        }
+        @media (max-width: 640px) {
+            .hero-title {
+                font-size: 35px;
+            }
+            .hero-actions {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .section {
+                padding: 50px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<header class="main-navbar sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-5 py-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="logo-box">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <div class="system-font font-bold text-lg text-gray-900 leading-tight">
+                        DYNAMIC DISASTER RESPONSE
+                    </div>
+                    <div class="text-xs text-gray-500 font-semibold tracking-wide">
+                        AND RESOURCE ALLOCATION SYSTEM
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex flex-wrap items-center gap-2">
+                <a href="#map-section" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-map-location-dot mr-1 text-red-600"></i> Tactical Map
+                </a>
+                <a href="#resources" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-warehouse mr-1 text-emerald-600"></i> Resources
+                </a>
+                <button onclick="triggerSOS()" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Emergency SOS
+                </button>
+                <a href="/submit/" class="px-4 py-2 rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-sm font-bold transition">
+                    Register Response Unit
+                </a>
+                <a href="/login/" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-bold transition">
+                    Command Login
+                </a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<!-- HERO SECTION WITH SLIDESHOW LOOP -->
+<section class="hero-section">
+    <div class="hero-slides-wrapper" id="slidesWrapper"></div>
+
+    <div class="hero-overlay"></div>
+
+    <div class="max-w-7xl mx-auto px-5 w-full hero-content">
+        <div>
+            <div class="hero-label">
+                <span><i class="fa-solid fa-circle text-xs"></i></span>
+                REAL DISASTER RESPONSE FOOTAGE
+            </div>
+
+            <h1 class="hero-title">
+                Rapid Response.<br>
+                Smarter Resource Allocation.
+            </h1>
+
+            <p class="hero-description">
+                A centralized disaster response platform designed to connect
+                emergency requests, field responders, rescue resources and
+                relief operations through one coordinated system.
+            </p>
+
+            <div class="hero-actions">
+                <a href="#map-section" class="hero-primary">
+                    <i class="fa-solid fa-location-crosshairs mr-2"></i> View Tactical Map
+                </a>
+                <a href="/submit/" class="hero-secondary">
+                    <i class="fa-solid fa-tower-broadcast mr-2"></i> Submit Emergency Request
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-card">
+        <div class="status-header">
+            <div class="font-bold text-gray-900">Disaster Control Status</div>
+            <div class="text-xs font-bold text-green-600">
+                <span class="live-dot"></span> ONLINE
+            </div>
+        </div>
+        <div class="status-row">
+            <span class="text-gray-500">Response Network</span>
+            <strong class="text-gray-900">ACTIVE</strong>
+        </div>
+        <div class="status-row">
+            <span class="text-gray-500">Emergency Level</span>
+            <strong class="text-red-600">CRITICAL</strong>
+        </div>
+        <div class="status-row">
+            <span class="text-gray-500">Field Units</span>
+            <strong class="text-gray-900">24 ACTIVE</strong>
+        </div>
+        <div class="status-row">
+            <span class="text-gray-500">HQ Sector</span>
+            <strong class="text-gray-900">SAHIWAL</strong>
+        </div>
+    </div>
+</section>
+
+<!-- MAP SECTION -->
+<section id="map-section" class="section">
+    <div class="max-w-7xl mx-auto px-5">
+        <div class="flex flex-wrap justify-between items-end gap-4 mb-6">
+            <div>
+                <div class="text-xs font-bold text-red-600 uppercase tracking-widest mb-2">Operations Center</div>
+                <h2 class="section-title system-font">Tactical Operations Map</h2>
+                <p class="section-subtitle">Monitor emergency locations and active response units.</p>
+            </div>
+            <div class="flex gap-4 text-xs font-semibold">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-red-500"></span> Critical SOS
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Active Responder
+                </div>
+            </div>
+        </div>
+        <div class="white-card p-4">
+            <div id="map"></div>
+        </div>
+    </div>
+</section>
+
+<!-- SOS + RESOURCES -->
+<section id="resources" class="section bg-gray-50">
+    <div class="max-w-7xl mx-auto px-5">
+        <div class="grid lg:grid-cols-2 gap-7">
+            <!-- SOS PANEL -->
+            <div class="sos-card overflow-hidden">
+                <div class="sos-header">
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl"><i class="fa-solid fa-satellite-dish"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold">Emergency SOS Beacon</h3>
+                            <p class="text-sm text-red-100 mt-1">Send emergency coordinates to disaster control.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <form onsubmit="event.preventDefault(); triggerSOS();" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Target GPS Coordinates</label>
+                            <input type="text" id="gps-coords" readonly value="Detecting location..." class="input-field">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Emergency Level</label>
+                            <select class="input-field">
+                                <option>CRITICAL: Citizens Trapped / High Water</option>
+                                <option>URGENT: Medical Evacuation Required</option>
+                                <option>SUPPLY: Food & Clean Water Needed</option>
+                                <option>RESCUE: Rescue Team Required</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition">
+                            <i class="fa-solid fa-tower-broadcast mr-2"></i> BROADCAST SOS ALERT
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div class="white-card p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <div class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Logistics</div>
+                        <h3 class="text-2xl font-bold system-font text-gray-900">Field Resources</h3>
+                    </div>
+                    <i class="fa-solid fa-boxes-stacked text-emerald-600 text-2xl"></i>
+                </div>
+                <div class="space-y-3">
+                    <div class="resource-card flex items-center gap-4">
+                        <div class="resource-icon"><i class="fa-solid fa-warehouse"></i></div>
+                        <div class="flex-1">
+                            <div class="font-bold text-gray-900">Sahiwal HQ Sector 01</div>
+                            <div class="text-xs text-gray-500 mt-1">Food Rations: 12,400 Units | Water: 45,000L</div>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-green-100 text-green-700">OPTIMAL</span>
+                    </div>
+                    <div class="resource-card flex items-center gap-4">
+                        <div class="resource-icon"><i class="fa-solid fa-truck"></i></div>
+                        <div class="flex-1">
+                            <div class="font-bold text-gray-900">Multan Forward Depot</div>
+                            <div class="text-xs text-gray-500 mt-1">Food Rations: 3,100 Units | Water: 8,000L</div>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">RESTOCKING</span>
+                    </div>
+                    <div class="resource-card flex items-center gap-4">
+                        <div class="resource-icon"><i class="fa-solid fa-ship"></i></div>
+                        <div class="flex-1">
+                            <div class="font-bold text-gray-900">Bahawalpur River Base</div>
+                            <div class="text-xs text-gray-500 mt-1">Medical Kits: 850 | Rescue Boats: 14 Active</div>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-green-100 text-green-700">ACTIVE</span>
+                    </div>
+                </div>
+                <div class="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <span class="text-xs text-gray-500">System Synchronization</span>
+                    <span class="text-xs font-bold text-green-600">
+                        <i class="fa-solid fa-circle text-[7px] mr-1"></i> LIVE / ONLINE
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SYSTEM CAPABILITIES -->
+<section class="section bg-white">
+    <div class="max-w-7xl mx-auto px-5">
+        <div class="text-center mb-10">
+            <div class="text-xs font-bold text-red-600 uppercase tracking-widest mb-2">Response Infrastructure</div>
+            <h2 class="section-title system-font">One System. Coordinated Response.</h2>
+            <p class="section-subtitle max-w-2xl mx-auto">
+                Designed to organize emergency requests, locations, resources and field operations through a centralized platform.
+            </p>
+        </div>
+        <div class="grid md:grid-cols-4 gap-5">
+            <div class="white-card p-6">
+                <div class="text-red-600 text-2xl mb-4"><i class="fa-solid fa-location-dot"></i></div>
+                <h3 class="font-bold text-gray-900 mb-2">Location Tracking</h3>
+                <p class="text-sm text-gray-500 leading-6">Emergency locations can be monitored through the operational map.</p>
+            </div>
+            <div class="white-card p-6">
+                <div class="text-red-600 text-2xl mb-4"><i class="fa-solid fa-users-gear"></i></div>
+                <h3 class="font-bold text-gray-900 mb-2">Response Teams</h3>
+                <p class="text-sm text-gray-500 leading-6">Coordinate rescuers, medical teams, vehicles and other response units.</p>
+            </div>
+            <div class="white-card p-6">
+                <div class="text-red-600 text-2xl mb-4"><i class="fa-solid fa-box-open"></i></div>
+                <h3 class="font-bold text-gray-900 mb-2">Resource Allocation</h3>
+                <p class="text-sm text-gray-500 leading-6">Track food, water, medical kits, vehicles and rescue equipment.</p>
+            </div>
+            <div class="white-card p-6">
+                <div class="text-red-600 text-2xl mb-4"><i class="fa-solid fa-bolt"></i></div>
+                <h3 class="font-bold text-gray-900 mb-2">Emergency Alerts</h3>
+                <p class="text-sm text-gray-500 leading-6">Broadcast SOS requests for faster disaster response coordination.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-8">
+    <div class="max-w-7xl mx-auto px-5">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+            <div>
+                <div class="font-bold text-white">DYNAMIC DISASTER RESPONSE AND RESOURCE ALLOCATION SYSTEM</div>
+                <div class="text-xs mt-2 text-gray-400">Developed By Group Members</div>
+            </div>
+            <div class="text-xs text-gray-500">Disaster Response & Resource Management Platform</div>
+        </div>
+    </div>
+</footer>
+
+<!-- LEAFLET JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    /* =====================================================
+       GPS LOCATION
+    ===================================================== */
+    function getGPS() {
+        const gpsField = document.getElementById("gps-coords");
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    gpsField.value = position.coords.latitude.toFixed(4) + ", " + position.coords.longitude.toFixed(4);
+                },
+                function() {
+                    gpsField.value = "30.6682, 73.1114 (Sahiwal HQ Sector)";
+                }
+            );
+        } else {
+            gpsField.value = "30.6682, 73.1114 (Sahiwal HQ Sector)";
+        }
+    }
+    getGPS();
+
+    /* =====================================================
+       MAP INITIALIZATION
+    ===================================================== */
+    const map = L.map("map").setView([30.6682, 73.1114], 10);
+
+    L.tileLayer("https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}", {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+        attribution: "&copy; Google Maps"
+    }).addTo(map);
+
+    const redIcon = L.icon({
+        iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    const greenIcon = L.icon({
+        iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    L.marker([30.6682, 73.1114], { icon: redIcon }).addTo(map)
+    .bindPopup("<b style='color:#b91c1c'>DISASTER CONTROL SOS</b><br>Flood Level: Critical<br>15 Citizens Trapped<br>Rescue Taskforce Dispatched.")
+    .openPopup();
+
+    L.marker([30.6900, 73.1300], { icon: greenIcon }).addTo(map)
+    .bindPopup("<b style='color:#047857'>RESCUE TASKFORCE #02</b><br>Rescue Boat<br>Status: Delivering Food Rations");
+
+    function triggerSOS() {
+        alert("EMERGENCY SOS TRANSMITTED!\n\nYour emergency beacon has been broadcasted to the Disaster Control Room and active field units.");
+    }
+
+    /* =====================================================
+       EXACT PATH MATCHING YOUR FOLDER LOCATION
+    ===================================================== */
+    const slideImages = [
+        "{% static 'videos/core/slides/slide1 (1).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (2).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (3).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (4).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (5).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (6).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (7).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (8).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (9).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (10).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (11).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (12).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (13).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (14).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (15).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (16).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (17).jpg' %}",
+        "{% static 'videos/core/slides/slide1 (18).jpg' %}"
+    ];
+
+    const wrapper = document.getElementById('slidesWrapper');
+    const slideElements = [];
+    let currentSlide = 0;
+
+    slideImages.forEach((imgUrl, index) => {
+        const div = document.createElement('div');
+        div.className = 'hero-slide' + (index === 0 ? ' active' : '');
+        div.style.backgroundImage = `url('${imgUrl}')`;
+        wrapper.appendChild(div);
+        slideElements.push(div);
+    });
+
+    function nextSlide() {
+        slideElements[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slideElements.length;
+        slideElements[currentSlide].classList.add('active');
+    }
+
+    setInterval(nextSlide, 4500);
+</script>
+
+</body>
+</html>

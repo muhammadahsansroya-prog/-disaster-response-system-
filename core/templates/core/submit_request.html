@@ -1,143 +1,309 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Emergency Help Alert</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>Disaster Emergency Response Portal - Submit Request</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        body { background-color: #f4f6f9; }
-        .card-custom { border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: none; }
-        #map { height: 250px; border-radius: 8px; margin-bottom: 15px; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0b1329;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .system-font { font-family: 'Rajdhani', sans-serif; }
+
+        /* ==========================================
+           BACKGROUND VIDEO SLIDESHOW WRAPPER
+        ========================================== */
+        .bg-video-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            background: #0f172a;
+        }
+
+        .bg-video-wrapper video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        /* DARK CHARCOAL OVERLAY FOR FORM READABILITY */
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(11, 19, 41, 0.88) 0%, rgba(15, 23, 42, 0.80) 50%, rgba(11, 19, 41, 0.90) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ==========================================
+           TOP BANNER & FORM STYLING
+        ========================================== */
+        .top-banner {
+            position: relative;
+            z-index: 10;
+            background: rgba(185, 28, 28, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .form-card {
+            position: relative;
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+        }
+
+        .input-field {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 11px 14px;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            border-color: #dc2626;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
+        }
+
+        #map {
+            width: 100%;
+            height: 240px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
     </style>
 </head>
+
 <body>
 
-    <nav class="navbar navbar-dark bg-danger px-4 shadow-sm">
-        <span class="navbar-brand mb-0 h1 fw-bold">🚨 Disaster Emergency Portal</span>
-        <div>
-            <a href="{% url 'dispatch_dashboard' %}" class="btn btn-outline-light btn-sm me-2">Admin Command</a>
-            <a href="{% url 'responder_dashboard' %}" class="btn btn-warning btn-sm">Field Responders</a>
+    <!-- REAL DISASTER FOOTAGE LOCAL VIDEO BACKGROUND -->
+    <div class="bg-video-wrapper">
+        <video id="bgVideo" autoplay muted playsinline>
+            <source id="videoSource" src="{% static 'videos/disaster_bg (1).mp4.mp4' %}" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- SUBTLE DARK OVERLAY -->
+    <div class="bg-overlay"></div>
+
+    <!-- TOP DISASTER BANNER -->
+    <header class="top-banner py-3 px-6 shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-xl text-yellow-300 animate-pulse"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                <span class="system-font font-extrabold text-lg text-white tracking-wider">
+                    DISASTER EMERGENCY RESPONSE PORTAL
+                </span>
+            </div>
+            <div class="flex items-center gap-3 text-xs font-bold">
+                <a href="/admin/" class="bg-black/40 hover:bg-black/60 text-white px-4 py-2 rounded-lg transition border border-white/20">
+                    Admin Command
+                </a>
+                <a href="/login/" class="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg transition shadow-md">
+                    Field Responder
+                </a>
+            </div>
         </div>
-    </nav>
+    </header>
 
-    <div class="container py-4" style="max-width: 750px;">
-        <div class="card card-custom p-4">
-            <h3 class="text-danger fw-bold mb-2">🚨 Emergency Assistance Request</h3>
-            <p class="text-muted mb-4">Please fill in your exact details. Your location and alert will be dispatched immediately to the nearest emergency responder team.</p>
+    <!-- MAIN FORM SECTION -->
+    <main class="flex-1 flex items-center justify-center p-4 py-10">
+        <div class="form-card max-w-2xl w-full p-6 md:p-8">
 
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+            <div class="mb-6">
+                <div class="flex items-center gap-3 text-red-600 mb-1">
+                    <i class="fa-solid fa-truck-medical text-2xl"></i>
+                    <h2 class="text-2xl font-extrabold text-gray-900 system-font tracking-wide">
+                        EMERGENCY ASSISTANCE REQUEST
+                    </h2>
+                </div>
+                <p class="text-xs text-gray-600">
+                    Please fill in your exact details. Your location and alert will be dispatched immediately to the nearest emergency responder team.
+                </p>
+            </div>
 
-            <form method="POST" action="{% url 'submit_request' %}">
+            <form method="POST" action="" class="space-y-4">
                 {% csrf_token %}
 
-                <!-- Victim Personal Details -->
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Victim / Contact Name *</label>
-                        <input type="text" name="victim_name" class="form-control" placeholder="e.g. M. Ahsan / Ali Raza" required>
+                <!-- ROW 1 -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">VICTIM / CONTACT NAME *</label>
+                        <input type="text" name="name" required placeholder="e.g. M. Ahsan / Ali Raza" class="input-field">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Contact Phone Number *</label>
-                        <input type="text" name="victim_phone" class="form-control" placeholder="0300-1234567" required>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">CONTACT PHONE NUMBER *</label>
+                        <input type="text" name="phone" required placeholder="0300-1234567" class="input-field">
                     </div>
                 </div>
 
-                <!-- Emergency Type & Urgency -->
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Disaster / Incident Category *</label>
-                        <select name="need_type" class="form-select" required>
-                            <option value="Medical Emergency">Medical Emergency / Ambulance</option>
-                            <option value="Flood Relief">Flood Relief / Water Rescue</option>
-                            <option value="Fire Emergency">Fire Emergency</option>
-                            <option value="Food & Shelter">Food, Clean Water & Shelter</option>
-                            <option value="Earthquake Rescue">Earthquake Building Collapse</option>
-                            <option value="General Rescue">General Emergency</option>
+                <!-- ROW 2 -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">DISASTER / INCIDENT CATEGORY *</label>
+                        <select name="category" class="input-field">
+                            <option>Medical Emergency / Ambulance (Rescue 1122)</option>
+                            <option>Flooded Area / Boat Rescue Required</option>
+                            <option>Fire Incident / Fire Brigade Required</option>
+                            <option>Building Collapse / Earthquake Trapped Victims</option>
+                            <option>Ice / Landslide Blocking Road & Medical</option>
+                            <option>Food & Clean Water Relief Ration</option>
                         </select>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Urgency Severity Level *</label>
-                        <select name="urgency" class="form-select" required>
-                            <option value="medium">Medium - Needs Assistance</option>
-                            <option value="high">High - Severe Emergency</option>
-                            <option value="critical">CRITICAL - Life Threatening</option>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">URGENCY SEVERITY LEVEL *</label>
+                        <select name="urgency" class="input-field">
+                            <option>Critical - Life Threatening</option>
+                            <option selected>Medium - Needs Assistance</option>
+                            <option>Low - General Relief / Ration Supply</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Incident Description -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Emergency Situation Details</label>
-                    <textarea name="description" class="form-control" rows="2" placeholder="Describe trapped people, injuries, fire severity, water level, etc."></textarea>
+                <!-- ROW 3 -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">EMERGENCY SITUATION DETAILS</label>
+                    <textarea name="details" rows="2" placeholder="Describe trapped people, injuries, fire severity, water level, food shortage, clothes needed, etc." class="input-field"></textarea>
                 </div>
 
-                <!-- Location & GPS Interactive Map -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Location Address / Area *</label>
-                    <div class="input-group mb-2">
-                        <input type="text" id="locationInput" name="location" class="form-control" placeholder="e.g. Near Main Market, College Road, Sahiwal" required>
-                        <button type="button" class="btn btn-outline-danger" onclick="locateMe()">📍 Detect My GPS Location</button>
+                <!-- ROW 4: GPS & MAP -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-bold text-gray-700 uppercase">LOCATION ADDRESS / AREA *</label>
+                        <button type="button" onclick="getLocation()" class="text-xs font-bold text-red-600 hover:text-red-800 flex items-center gap-1">
+                            <i class="fa-solid fa-location-crosshairs"></i> Use My GPS Location
+                        </button>
                     </div>
-                    
-                    <small class="text-muted d-block mb-2">Drag the pin on the map to mark your exact location:</small>
+                    <input type="text" id="address" name="address" required placeholder="Type to search an address, or use GPS / drag the pin on map" class="input-field mb-2">
+
                     <div id="map"></div>
+                    <input type="hidden" id="lat" name="latitude" value="30.6682">
+                    <input type="hidden" id="lng" name="longitude" value="73.1114">
                 </div>
 
-                <!-- Hidden GPS Values -->
-                <input type="hidden" id="latitude" name="latitude" value="30.6514">
-                <input type="hidden" id="longitude" name="longitude" value="73.1306">
-
-                <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold py-2 shadow-sm">
-                    🚀 SUBMIT EMERGENCY ALERT TO DISPATCH
+                <!-- SUBMIT BUTTON -->
+                <button type="submit" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2 system-font tracking-wider">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    SUBMIT EMERGENCY ALERT TO DISPATCH
                 </button>
             </form>
         </div>
-    </div>
+    </main>
 
-    <!-- Leaflet JS for Interactive Map Pining -->
+    <!-- LEAFLET JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
-        var defaultLat = 30.6514;
-        var defaultLng = 73.1306;
+        /* ==========================================
+           100% PERFECT LOCAL VIDEO SLIDESHOW LOOP SCRIPT
+        ========================================== */
+        const playlist = [
+            "{% static 'videos/disaster_bg (1).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (2).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (3).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (4).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (5).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (6).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (7).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (8).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (10).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (11).mp4.mp4' %}",
+            "{% static 'videos/disaster_bg (12).mp4.mp4' %}"
+        ];
 
-        var map = L.map('map').setView([defaultLat, defaultLng], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
-        }).addTo(map);
+        let currentVideoIndex = 0;
+        const videoElement = document.getElementById('bgVideo');
+        const sourceElement = document.getElementById('videoSource');
 
-        var marker = L.marker([defaultLat, defaultLng], {draggable: true}).addTo(map);
-
-        marker.on('dragend', function(e) {
-            var position = marker.getLatLng();
-            updateCoords(position.lat, position.lng);
+        videoElement.addEventListener('ended', function() {
+            currentVideoIndex = (currentVideoIndex + 1) % playlist.length;
+            sourceElement.src = playlist[currentVideoIndex];
+            videoElement.load();
+            videoElement.play();
         });
 
-        function updateCoords(lat, lng) {
-            document.getElementById('latitude').value = lat;
-            document.getElementById('longitude').value = lng;
-        }
+        /* ==========================================
+           MAP & GPS SCRIPT
+        ========================================== */
+        const initialLat = 30.6682;
+        const initialLng = 73.1114;
 
-        function locateMe() {
+        const map = L.map('map').setView([initialLat, initialLng], 12);
+
+        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; Google Maps'
+        }).addTo(map);
+
+        let marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+
+        marker.on('dragend', function (e) {
+            const lat = marker.getLatLng().lat.toFixed(6);
+            const lng = marker.getLatLng().lng.toFixed(6);
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lng;
+            document.getElementById('address').value = lat + ", " + lng + " (Selected Location)";
+        });
+
+        function getLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var lat = position.coords.latitude;
-                    var lng = position.coords.longitude;
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    document.getElementById('lat').value = lat;
+                    document.getElementById('lng').value = lng;
+                    document.getElementById('address').value = lat.toFixed(4) + ", " + lng.toFixed(4) + " (GPS Location Verified)";
+                    
                     map.setView([lat, lng], 15);
                     marker.setLatLng([lat, lng]);
-                    updateCoords(lat, lng);
-                    document.getElementById('locationInput').value = "GPS: " + lat.toFixed(5) + ", " + lng.toFixed(5);
-                }, function() {
-                    alert("Geolocation failed. Please drag the pin on the map manually.");
+                }, function () {
+                    alert("Unable to retrieve GPS location. Please select on map manually.");
                 });
+            } else {
+                alert("Geolocation is not supported by your browser.");
             }
         }
     </script>
